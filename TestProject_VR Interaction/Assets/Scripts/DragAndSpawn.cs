@@ -45,4 +45,14 @@ public class DragAndSpawn : MonoBehaviour
 		Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + _offset;
 		transform.position = curPosition;
 	}
+
+	void OnMouseUp()
+	{
+		// Snap to grid. Currently 1 unity unit is the grid we're based on.
+		float currentX = Mathf.Round(gameObject.transform.position.x);
+		float currentY = Mathf.Round(gameObject.transform.position.y);
+		float currentZ = Mathf.Round(gameObject.transform.position.z);
+
+		gameObject.transform.position = new Vector3(currentX, currentY, currentZ);
+	}
 }

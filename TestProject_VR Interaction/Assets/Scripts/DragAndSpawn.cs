@@ -2,7 +2,7 @@
 
 public class DragAndSpawn : MonoBehaviour
 {
-	public Transform Ball;
+	public Transform ObjectToSpawn;
 
 	private bool _isSpawner = true;
 	private Vector3 _screenPoint;
@@ -20,6 +20,8 @@ public class DragAndSpawn : MonoBehaviour
 
 	void OnMouseDown()
 	{
+		// TODO: Change this to own written code. This is only here for testing.
+		// Code from: http://answers.unity3d.com/questions/12322/drag-gameobject-with-mouse.html By: MarkGX
 		_screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
 		_offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, _screenPoint.z));
 	}
@@ -28,16 +30,17 @@ public class DragAndSpawn : MonoBehaviour
 	{
 		if (_isSpawner)
 		{
-			Instantiate(Ball, gameObject.transform.position, Quaternion.identity);
+			Instantiate(ObjectToSpawn, gameObject.transform.position, Quaternion.identity);
 
 			// Change color of the ball you grabbed, changing it to fully visable.
-			Color c = gameObject.GetComponent<Renderer>().material.color;
-			c.a = 1f;
-			gameObject.GetComponent<Renderer>().material.color = c;
+			Color color = gameObject.GetComponent<Renderer>().material.color;
+			color.a = 1f;
+			gameObject.GetComponent<Renderer>().material.color = color;
 
 		}
 		_isSpawner = false;
 
+		// TODO: Change to own written code. Same as on OnMouseDown()
 		Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, _screenPoint.z);
 		Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + _offset;
 		transform.position = curPosition;

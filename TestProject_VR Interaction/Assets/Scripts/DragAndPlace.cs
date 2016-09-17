@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class DragAndPlace : MonoBehaviour
 {
-    private float BUILD_HEIGHT = 1.25f, BUILD_HEIGHT_LERP = 0.15f;
-    private bool placed = false;
-    private float SNAP_VALUE = 0.16f;
+    private float BUILD_HEIGHT = 1.25f, BUILD_HEIGHT_LERP = 0.15f; // make the tiles stay at a certain height
+    private bool placed = false; // if the tile is still "dragged" around (the mouse button is not released yet)
+    private float SNAP_VALUE = 0.16f; // important for choosing grid size (do not edit unless you edit the tile sizes)
     float snapInverse;
     void Awake()
     {
@@ -36,12 +36,13 @@ public class DragAndPlace : MonoBehaviour
         {
             Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, root._screenPoint.z);
             Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + root._offset;
-            //float currentY = Mathf.Round(curPosition.y);
+
             float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
             float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
 
+            //float currentX = Mathf.Round(curPosition.y);
             //decimal currentX = Math.Round((decimal)curPosition.x, 2, MidpointRounding.AwayFromZero);
-            //decimal currentZ = Math.Round((decimal)curPosition.z, 2, MidpointRounding.AwayFromZero);
+
             gameObject.transform.position = new Vector3(currentX, curPosition.y, currentZ);
         }
         else

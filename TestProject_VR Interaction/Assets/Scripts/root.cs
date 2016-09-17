@@ -6,6 +6,7 @@ public class root : MonoBehaviour {
 
 	public static Vector3 _screenPoint;
     public static Vector3 _offset;
+    public static Quaternion previewRotation;
 
     public static KeyCode nextPreviewKey = KeyCode.X;
     public static KeyCode prevPreviewKey = KeyCode.Z;

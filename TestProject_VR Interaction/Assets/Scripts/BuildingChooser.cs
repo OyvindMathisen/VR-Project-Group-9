@@ -13,6 +13,7 @@ public class BuildingChooser : MonoBehaviour {
         ShowPreview(0, 0);
     }
 
+    // spawns the previews of the tiles in the panel
     void ShowPreview(int tileType, int tileNumber)
     {
         if (tileType == 0)
@@ -25,7 +26,7 @@ public class BuildingChooser : MonoBehaviour {
         }
         
     }
-    // Update is called once per frame
+
     void Update()
     {
         // temp easier build mode with mouse
@@ -35,6 +36,7 @@ public class BuildingChooser : MonoBehaviour {
             Cursor.visible = true;
         }
 
+        // poorly designed tile choosing system, but it works
         if (Input.GetKeyDown(root.nextPreviewKey))
         {
             if (tileType == 0)

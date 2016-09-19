@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Immerseum.VRSimulator;
 
 public class BuildingChooser : MonoBehaviour {
 
@@ -91,5 +92,10 @@ public class BuildingChooser : MonoBehaviour {
             tileType = 1;
             ShowPreview(1, currentTileL);
         }
+    }
+
+    void FixedUpdate()
+    {
+        ControllerManager.moveController(0, transform.position + new Vector3(0, 0, 0.01f), HMDSimulator.leftController.rotation);
     }
 }

@@ -3,39 +3,62 @@ using UnityEngine;
 
 public class DragAndPlace : MonoBehaviour
 {
-    private float BUILD_HEIGHT = 1.25f, BUILD_HEIGHT_LERP = 0.15f; // make the tiles stay at a certain height
+    private float BUILD_HEIGHT = 1.0f, BUILD_HEIGHT_LERP = 0.15f; // make the tiles stay at a certain height
     private bool placed = false; // if the tile is still "dragged" around (the mouse button is not released yet)
     private float SNAP_VALUE = 0.16f; // important for choosing grid size (do not edit unless you edit the tile sizes)
     float snapInverse;
-    void Awake()
-    {
-        snapInverse = 1 / SNAP_VALUE;
-    }
-    void Update()
-    {
-        if (!placed)
-        {
-            if (Input.GetMouseButtonUp(1))
-            {
-                transform.Rotate(0, 90, 0);
-            }
-            if (Input.GetMouseButtonUp(0))
-            {
-                // snap to ground level
-                //var temp = transform.position;
-                //temp.y = BUILD_HEIGHT;
-                //transform.position = temp;
+	private Wand Rhand;
 
-                placed = true;
-            }
-        }
-    }
+	private bool hasRotated = false;
+
+	void Awake()
+    {
+		snapInverse = 1 / SNAP_VALUE;
+		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
+	}
+	void Update()
+	{
+		if (!placed)
+		{
+			if (Rhand.triggerButtonUp)
+			{
+				// snap to ground level
+				//var temp = transform.position;
+				//temp.y = BUILD_HEIGHT;
+				//transform.position = temp;
+				placed = true;
+			}
+
+			if (Rhand.touchpadRight && !hasRotated)
+			{
+				transform.Rotate(0, -90, 0);
+				hasRotated = true;
+			}
+			
+			if (Rhand.touchpadLeft && !hasRotated)
+			{
+				transform.Rotate(0, 90, 0);
+				hasRotated = true;
+			}
+
+			if (Rhand.gripButtonDown)
+			{
+				Destroy(gameObject);
+			}
+
+			// To prevent the building from rotating at the speed of light
+			if (!Rhand.touchpadLeft && !Rhand.touchpadRight)
+			{
+				hasRotated = false;
+			}
+		}
+	}
     void FixedUpdate()
     {
-        if (!placed)
+		if (!placed)
         {
-            Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, root._screenPoint.z);
-            Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenPoint) + root._offset;
+            //Vector3 curScreenPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, root._screenPoint.z);
+			Vector3 curPosition = Rhand.transform.position; //Camera.main.ScreenToWorldPoint(curScreenPoint) + root._offset;
 
             float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
             float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
@@ -43,7 +66,7 @@ public class DragAndPlace : MonoBehaviour
             //float currentX = Mathf.Round(curPosition.y);
             //decimal currentX = Math.Round((decimal)curPosition.x, 2, MidpointRounding.AwayFromZero);
 
-            gameObject.transform.position = new Vector3(currentX, curPosition.y, currentZ);
+            transform.position = new Vector3(currentX, curPosition.y, currentZ);
         }
         else
         {
@@ -56,8 +79,11 @@ public class DragAndPlace : MonoBehaviour
         }
     }
 
-    void OnMouseDown()
-    {
-        Destroy(gameObject);
-    }
+	void OnTriggerStay(Collider other)
+	{
+		if (other.tag == "Rhand" && Rhand.triggerButtonDown)
+		{
+			placed = false;
+		}
+	}
 }

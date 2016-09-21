@@ -21,7 +21,7 @@ public class Wand : MonoBehaviour
     private SteamVR_TrackedObject trackedObj;
 	private SteamVR_Controller.Device device;
 
-	void Start()
+    void Start()
     {
         trackedObj = GetComponent<SteamVR_TrackedObject>();
     }
@@ -49,7 +49,7 @@ public class Wand : MonoBehaviour
 		}
 
 		if (!device.GetPress(SteamVR_Controller.ButtonMask.Touchpad))
-		{
+        {
 			touchpadUp = false;
 			touchpadDown = false;
 			touchpadRight = false;

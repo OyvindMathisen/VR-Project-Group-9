@@ -11,6 +11,8 @@ public class root : MonoBehaviour {
     public static KeyCode nextPreviewKey = KeyCode.X;
     public static KeyCode prevPreviewKey = KeyCode.Z;
 
+    public static bool isHolding = false;
+
     // temporary mouse control notes:
     // - right click while dragging to rotate 90 degrees
     // - left click a placed tile to delete it

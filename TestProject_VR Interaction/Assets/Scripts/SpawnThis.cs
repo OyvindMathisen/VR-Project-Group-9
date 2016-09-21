@@ -11,23 +11,6 @@ public class SpawnThis : MonoBehaviour
 
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
-        // temporary solution for getting rid of the tile that was already there when you choose a new one
-	    if (Input.GetKeyDown(root.nextPreviewKey)
-            || Input.GetKeyDown(root.prevPreviewKey)
-            || Input.GetKeyDown(KeyCode.Alpha1)
-            || Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            Destroy(gameObject);
-            root.previewRotation = transform.rotation;
-        }
-		if (Rhand.triggerButtonDown)
-		{
-			// ?
-		}
-	}
 
     void FixedUpdate()
     {

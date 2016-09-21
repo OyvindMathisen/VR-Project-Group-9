@@ -25,23 +25,30 @@ public class BuildingChooser : MonoBehaviour {
     // spawns the previews of the tiles in the panel
     void ShowPreview(int tileType, int tileNumber)
     {
+        Transform[] allChildren = transform.parent.GetComponentsInChildren<Transform>();
+        foreach (Transform child in allChildren)
+        {
+            if (child.tag == "PreviewTile")
+            {
+                Destroy(child.gameObject);
+            }
+        }
         if (tileType == 0)
         {
             Instantiate(previewBuildings[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
         }
         else if (tileType == 1)
         {
-			Instantiate(previewBuildings[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
+            Instantiate(previewLandscapes[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
 		}
         
     }
 
     void Update()
     {
-		/*
-		// TODO: Fix this spawning the previews ontop of each other infinitly
 		if (Lhand.touchpadRight && !hasSwitched)
 		{
+            Debug.Log("Tiletype: " + tileType);
 			switch (tileType)
 			{
 				case 0:
@@ -59,7 +66,7 @@ public class BuildingChooser : MonoBehaviour {
 					{
 						currentTileL = 0;
 					}
-					ShowPreview(1, currentTileL);
+                    ShowPreview(1, currentTileL);
 					hasSwitched = true;
 					break;
 			}
@@ -92,24 +99,24 @@ public class BuildingChooser : MonoBehaviour {
 
 		if (Lhand.touchpadUp && !hasSwitched)
 		{
-			tileType = 0;
-			ShowPreview(0, currentTileB);
+            tileType = 0;
+			ShowPreview(tileType, currentTileB);
 			hasSwitched = true;
 		}
 
 		if (Lhand.touchpadDown && !hasSwitched)
-		{
-			tileType = 1;
-			ShowPreview(0, currentTileB);
-			hasSwitched = true;
+        {
+            tileType = 1;
+            ShowPreview(tileType, currentTileL);
+            hasSwitched = true;			
 		}
 
 		if (!Lhand.touchpadRight && !Lhand.touchpadLeft && !Lhand.touchpadUp && !Lhand.touchpadDown)
 		{
 			hasSwitched = false;
 		}
-		*/
-
+		
+        /*
         // temp easier build mode with mouse
         if (Input.GetKey(KeyCode.Tab))
         {
@@ -172,10 +179,6 @@ public class BuildingChooser : MonoBehaviour {
             tileType = 1;
             ShowPreview(1, currentTileL);
         }
-    }
-
-    void FixedUpdate()
-    {
-        ControllerManager.moveController(0, transform.position + new Vector3(0, 0, 0.01f), HMDSimulator.leftController.rotation);
+        */
     }
 }

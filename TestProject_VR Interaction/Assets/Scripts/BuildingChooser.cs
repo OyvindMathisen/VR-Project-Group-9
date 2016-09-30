@@ -6,12 +6,12 @@ public class BuildingChooser : MonoBehaviour {
 
     public Transform[] Buildings, Landscapes;
     public Transform[] previewBuildings, previewLandscapes;
-    public int tileType = 0;
-    private int currentTileB = 0, currentTileL = 0;
+	public int tileType = 0;
+    private int currentTileB, currentTileL = 0;
     private GameObject currentPreview;
     public Transform Panel;
 
-	private Vector3 PANEL_POS = new Vector3(-0.1977f, 0.2587f, 0.4187f);
+	// private Vector3 PANEL_POS = new Vector3(-0.1977f, 0.2587f, 0.4187f);
 
 	private Wand Lhand;
 	private bool hasSwitched = false;
@@ -23,8 +23,9 @@ public class BuildingChooser : MonoBehaviour {
 	}
 
     // spawns the previews of the tiles in the panel
-    void ShowPreview(int tileType, int tileNumber)
+    void ShowPreview(int tileType_internal, int tileNumber)
     {
+		// Remove old copies of the preview tile from the left hand.
         Transform[] allChildren = transform.parent.GetComponentsInChildren<Transform>();
         foreach (Transform child in allChildren)
         {
@@ -33,11 +34,13 @@ public class BuildingChooser : MonoBehaviour {
                 Destroy(child.gameObject);
             }
         }
-        if (tileType == 0)
+
+        if (tileType_internal == 0)
         {
             Instantiate(previewBuildings[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
         }
-        else if (tileType == 1)
+
+        else if (tileType_internal == 1)
         {
             Instantiate(previewLandscapes[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
 		}

@@ -17,6 +17,8 @@ public class Wand : MonoBehaviour
 	public bool touchpadRight = false;
 	public bool touchpadLeft = false;
 
+	public float touchpadDetectLimit = 0.7f;
+
     private SteamVR_Controller.Device controller { get { return SteamVR_Controller.Input((int)trackedObj.index); } }
     private SteamVR_TrackedObject trackedObj;
 	private SteamVR_Controller.Device device;
@@ -42,10 +44,10 @@ public class Wand : MonoBehaviour
 		if (device.GetPress(SteamVR_Controller.ButtonMask.Touchpad))
 		{
 			Vector2 touchpad = (device.GetAxis(Valve.VR.EVRButtonId.k_EButton_Axis0));
-			touchpadUp = touchpad.y > 0.7f;
-			touchpadDown = touchpad.y < -0.7f;
-			touchpadRight = touchpad.x > 0.7f;
-			touchpadLeft = touchpad.x < -0.7;
+			touchpadUp = touchpad.y > touchpadDetectLimit;
+			touchpadDown = touchpad.y < -touchpadDetectLimit;
+			touchpadRight = touchpad.x > touchpadDetectLimit;
+			touchpadLeft = touchpad.x < -touchpadDetectLimit;
 		}
 
 		if (!device.GetPress(SteamVR_Controller.ButtonMask.Touchpad))

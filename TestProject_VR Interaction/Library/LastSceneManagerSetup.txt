@@ -1,4 +1,7 @@
 sceneSetups:
 - path: Assets/Scenes/InTheMiddle.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/Scenes/IslandTest.unity
   isLoaded: 1
   isActive: 1

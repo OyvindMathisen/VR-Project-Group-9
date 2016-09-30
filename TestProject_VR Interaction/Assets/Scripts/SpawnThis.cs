@@ -17,14 +17,6 @@ public class SpawnThis : MonoBehaviour
         transform.Rotate(0, 1, 0);
     }
 
-	//void OnMouseDown()
-	//{
-	//	// TODO: Change this to own written code. This is only here for testing.
-	//	root._screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
-	//	root._offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, root._screenPoint.z));
- //       Instantiate(ObjectToSpawn, gameObject.transform.position, Quaternion.identity);
- //   }
-
 	void OnTriggerStay(Collider other)
 	{
 		if (other.tag == "Rhand")

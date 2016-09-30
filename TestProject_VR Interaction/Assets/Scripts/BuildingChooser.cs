@@ -48,7 +48,6 @@ public class BuildingChooser : MonoBehaviour {
     {
 		if (Lhand.touchpadRight && !hasSwitched)
 		{
-            Debug.Log("Tiletype: " + tileType);
 			switch (tileType)
 			{
 				case 0:
@@ -115,70 +114,5 @@ public class BuildingChooser : MonoBehaviour {
 		{
 			hasSwitched = false;
 		}
-		
-        /*
-        // temp easier build mode with mouse
-        if (Input.GetKey(KeyCode.Tab))
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = true;
-        }
-
-        // poorly designed tile choosing system, but it works
-        if (Input.GetKeyDown(root.nextPreviewKey))
-        {
-            if (tileType == 0)
-            {
-                currentTileB++;
-                if (currentTileB == Buildings.Length)
-                {
-                    currentTileB = 0;
-                }
-                ShowPreview(0, currentTileB);
-            }
-            else if (tileType == 1)
-            {
-                currentTileL++;
-                if (currentTileL == Landscapes.Length)
-                {
-                    currentTileL = 0;
-                }
-                ShowPreview(1, currentTileL);
-            }
-        }
-        if (Input.GetKeyDown(root.prevPreviewKey))
-        {
-            if (tileType == 0)
-            {
-                currentTileB--;
-                if (currentTileB == -1)
-                {
-                    currentTileB = Buildings.Length-1;
-                }
-                ShowPreview(0, currentTileB);
-            }
-            else if (tileType == 1)
-            {
-                currentTileL--;
-                if (currentTileL == -1)
-                {
-                    currentTileL = Landscapes.Length-1;
-                }
-                ShowPreview(1, currentTileL);
-            }
-        }
-
-        // temp: switch between tiletypes
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            tileType = 0;
-            ShowPreview(0, currentTileB);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            tileType = 1;
-            ShowPreview(1, currentTileL);
-        }
-        */
     }
 }

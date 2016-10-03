@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class DragAndPlace : MonoBehaviour
 {
-	private float BUILD_HEIGHT = 1.0f, BUILD_HEIGHT_LERP = 0.15f; // make the tiles stay at a certain height
+	private float BUILD_HEIGHT = 100.0f, BUILD_HEIGHT_LERP = 15.0f; // make the tiles stay at a certain height
 	private bool placed = false; // if the tile is still "dragged" around (the mouse button is not released yet)
-	private float SNAP_VALUE = 0.08f; // important for choosing grid size (do not edit unless you edit the tile sizes)
+	private float SNAP_VALUE = 8.0f; // important for choosing grid size (do not edit unless you edit the tile sizes)
 	float snapInverse;
 	private Wand Rhand;
 	private bool hasRotated = false;

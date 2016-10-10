@@ -12,7 +12,7 @@ public class DragAndPlace : MonoBehaviour
 	public LayerMask tiles;
 	private Collider ownCollider;
 
-	public GameObject previewPlacement;
+	private GameObject previewPlacement;
 	private MeshRenderer previewMesh;
 
 	void Awake()
@@ -29,6 +29,7 @@ public class DragAndPlace : MonoBehaviour
 	{
 		if (!placed)
 		{
+			// Collision check to prevent overlapping buildings
 			if (Rhand.triggerButtonUp)
 			{
 				RaycastHit hit;
@@ -62,21 +63,25 @@ public class DragAndPlace : MonoBehaviour
 				root.isHolding = false;
 			}
 
+			// Rotate handler, right direction
 			if (Rhand.touchpadRight && !hasRotated)
 			{
 				transform.Rotate(0, -90, 0);
 				hasRotated = true;
 			}
 
+			// Rotate handler, left direction
 			if (Rhand.touchpadLeft && !hasRotated)
 			{
 				transform.Rotate(0, 90, 0);
 				hasRotated = true;
 			}
 
+			// Delete the building in hand
 			if (Rhand.gripButtonDown)
 			{
 				root.isHolding = false;
+				previewMesh.enabled = false;
 				Destroy(gameObject);
 			}
 
@@ -115,10 +120,6 @@ public class DragAndPlace : MonoBehaviour
 				transform.position = temp;
 			}
 		}
-	}
-	void FixedUpdate()
-	{
-		
 	}
 
 	void OnTriggerStay(Collider other)

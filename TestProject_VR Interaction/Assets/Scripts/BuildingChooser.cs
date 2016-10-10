@@ -11,8 +11,6 @@ public class BuildingChooser : MonoBehaviour {
     private GameObject currentPreview;
     public Transform Panel;
 
-	// private Vector3 PANEL_POS = new Vector3(-0.1977f, 0.2587f, 0.4187f);
-
 	private Wand Lhand;
 	private bool hasSwitched = false;
 	
@@ -49,6 +47,7 @@ public class BuildingChooser : MonoBehaviour {
 
     void Update()
     {
+		// Changing building in your selector
 		if (Lhand.touchpadRight && !hasSwitched)
 		{
 			switch (tileType)
@@ -101,18 +100,23 @@ public class BuildingChooser : MonoBehaviour {
 
 		if (Lhand.touchpadUp && !hasSwitched)
 		{
-            tileType = 0;
+			tileType++;
+			if (tileType >= 2)
+				tileType = 0;
 			ShowPreview(tileType, currentTileB);
 			hasSwitched = true;
 		}
 
 		if (Lhand.touchpadDown && !hasSwitched)
         {
-            tileType = 1;
+			tileType--;
+			if (tileType <= -1)
+				tileType = 1;
             ShowPreview(tileType, currentTileL);
-            hasSwitched = true;			
+            hasSwitched = true;
 		}
 
+		// Prevents scrolling through the menu stupidly quickly
 		if (!Lhand.touchpadRight && !Lhand.touchpadLeft && !Lhand.touchpadUp && !Lhand.touchpadDown)
 		{
 			hasSwitched = false;

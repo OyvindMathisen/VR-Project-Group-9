@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class AreaCheck : MonoBehaviour {
 
-	public GameObject[] checks;
+	public GameObject[] Checks;
 	private CheckCollision[] checkCollisions = new CheckCollision[8];
 	private GameObject[] buildings = new GameObject[8];
 	private string[] bNames = new string[8];
@@ -13,9 +13,9 @@ public class AreaCheck : MonoBehaviour {
 
 	void Awake()
 	{
-		for (int i = 0; i < 8; i++)
+		for (var i = 0; i < 8; i++)
 		{
-			checkCollisions[i] = checks[i].GetComponent<CheckCollision>();
+			checkCollisions[i] = Checks[i].GetComponent<CheckCollision>();
 		}
 	}
 
@@ -34,90 +34,81 @@ public class AreaCheck : MonoBehaviour {
 		//var temp[] = new GameObject[8];
 		//temp[1].transform
 
-		for (int i = 0; i < 8; i++)
+		for (var i = 0; i < 8; i++)
 		{
-			if (checkCollisions[i].getTile() != null)
-			{
-				buildings[i] = checkCollisions[i].getTile();
+		    if (checkCollisions[i].getTile() != null)
+		    {
+		        buildings[i] = checkCollisions[i].getTile();
 
-				string[] temp = buildings[i].name.Split('(');
-				string name = temp[0];
-				bNames[i] = name;
-			}
+		        var temp = buildings[i].name.Split('(');
+		        bNames[i] = temp[0];
+		    }
 		}
 
-		string[] objTemp = obj.name.Split('(');
-		string objName = objTemp[0];
+		var objTemp = obj.name.Split('(');
+		var objName = objTemp[0];
 
-		switch (objName)
-		{
-			case "House":
-				if (bNames[0] == "LuxuryHouse" && bNames[1] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 0, 0)) as GameObject;
-					Destroy(buildings[0].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked0");
-				}
-				else if (bNames[1] == "LuxuryHouse" && bNames[2] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 90, 0)) as GameObject;
-					Destroy(buildings[1].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked1");
-				}
-				else if (bNames[2] == "LuxuryHouse" && bNames[3] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 180, 0)) as GameObject;
-					Destroy(buildings[2].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked2");
-				}
-				else if (bNames[3] == "LuxuryHouse" && bNames[4] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 270, 0)) as GameObject;
-					Destroy(buildings[3].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked3");
-				}
-				else if (bNames[4] == "LuxuryHouse" && bNames[5] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 270, 0)) as GameObject;
-					Destroy(buildings[4].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked4");
-				}
-				else if (bNames[5] == "LuxuryHouse" && bNames[6] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 270, 0)) as GameObject;
-					Destroy(buildings[5].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked5");
-				}
-				else if (bNames[6] == "LuxuryHouse" && bNames[7] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 270, 0)) as GameObject;
-					Destroy(buildings[6].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked6");
-				}
-				else if (bNames[7] == "LuxuryHouse" && bNames[0] == "LuxuryHouse")
-				{
-					GameObject tile = Instantiate(Villa, transform.position, Quaternion.Euler(0, 270, 0)) as GameObject;
-					Destroy(buildings[7].gameObject);
-					Destroy(obj);
-					Debug.Log("This worked7");
-				}
-				break;
-			case "LuxuryHouse":
+	    switch (objName)
+	    {
+	        case "House":
+	            if (bNames[0] == "LuxuryHouse" && bNames[1] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.left * 8, Quaternion.Euler(0, 180, 0));
+	                Destroy(buildings[0].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[1] == "LuxuryHouse" && bNames[2] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.forward * 8, Quaternion.Euler(0, 0, 0));
+	                Destroy(buildings[1].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[2] == "LuxuryHouse" && bNames[3] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.forward * 8, Quaternion.Euler(0, 270, 0));
+	                Destroy(buildings[2].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[3] == "LuxuryHouse" && bNames[4] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.right * 8, Quaternion.Euler(0, 90, 0));
+	                Destroy(buildings[3].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[4] == "LuxuryHouse" && bNames[5] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.right * 8, Quaternion.Euler(0, 0, 0));
+	                Destroy(buildings[4].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[5] == "LuxuryHouse" && bNames[6] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.back * 8, Quaternion.Euler(0, 180, 0));
+	                Destroy(buildings[5].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[6] == "LuxuryHouse" && bNames[7] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.back * 8, Quaternion.Euler(0, 90, 0));
+	                Destroy(buildings[6].gameObject);
+	                Destroy(obj);
+	            }
+	            else if (bNames[7] == "LuxuryHouse" && bNames[0] == "LuxuryHouse")
+	            {
+	                var tile = Instantiate(Villa, transform.position + Vector3.left * 8, Quaternion.Euler(0, 270, 0));
+	                Destroy(buildings[7].gameObject);
+	                Destroy(obj);
+	            }
+	            break;
+	        case "LuxuryHouse":
 
-				break;
-		}
+	            break;
+	    }
 
-		for (int j = 0; j < bNames.Length; j++) {
+		for (var j = 0; j < bNames.Length; j++) {
 			buildings[j] = null;
 			bNames[j] = "";
 		}
 
-	}
+    }
 }

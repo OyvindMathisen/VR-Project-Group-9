@@ -4,7 +4,7 @@ using UnityEngine;
 public class DragAndPlace : MonoBehaviour
 {
 	private float BUILD_HEIGHT = 100.0f, BUILD_HEIGHT_LERP = 15.0f; // make the tiles stay at a certain height
-	private bool placed = false; // if the tile is still "dragged" around (the mouse button is not released yet)
+	public bool placed = false; // if the tile is still "dragged" around (the mouse button is not released yet)
 	private float SNAP_VALUE = 8.0f; // important for choosing grid size (do not edit unless you edit the tile sizes)
 	float snapInverse;
 	private Wand Rhand;
@@ -118,6 +118,9 @@ public class DragAndPlace : MonoBehaviour
 				temp.z = Mathf.Round(temp.z * snapInverse) / snapInverse;
 				temp.y = Mathf.Lerp(transform.position.y, BUILD_HEIGHT, BUILD_HEIGHT_LERP);
 				transform.position = temp;
+
+				AreaCheck ac = previewPlacement.GetComponent<AreaCheck>();
+				ac.CheckForValidCombo(gameObject);
 			}
 		}
 	}

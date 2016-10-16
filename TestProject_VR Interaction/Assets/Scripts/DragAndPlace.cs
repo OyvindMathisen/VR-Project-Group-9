@@ -4,60 +4,72 @@ using UnityEngine;
 public class DragAndPlace : MonoBehaviour
 {
 	private float BUILD_HEIGHT = 100.0f, BUILD_HEIGHT_LERP = 15.0f; // make the tiles stay at a certain height
-	public bool placed = false; // if the tile is still "dragged" around (the mouse button is not released yet)
-	private float SNAP_VALUE = 8.0f; // important for choosing grid size (do not edit unless you edit the tile sizes)
+	public bool placed; // if the tile is still "dragged" around (the mouse button is not released yet)
+    private bool oncePlaced, onceNotPlaced;
+    private float SNAP_VALUE = 8.0f; // important for choosing grid size (do not edit unless you edit the tile sizes)
 	float snapInverse;
 	private Wand Rhand;
-	private bool hasRotated = false;
+	private bool hasRotated;
 	public LayerMask tiles;
-	private Collider ownCollider;
 
 	private GameObject previewPlacement;
-	private MeshRenderer previewMesh;
+
+    private AreaCheck areaCheck;
+
+    private Vector3 lastSafePos;
+    private Quaternion lastSafeRot;
 
 	void Awake()
 	{
 		snapInverse = 1 / SNAP_VALUE;
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
 
-		ownCollider = GetComponent<Collider>();
 		previewPlacement = GameObject.Find("PreviewPlacement");
-		previewMesh = previewPlacement.GetComponent<MeshRenderer>();
-		previewMesh.enabled = false;
+
+        areaCheck = previewPlacement.GetComponent<AreaCheck>();
+
+	    lastSafePos = Vector3.zero;
 	}
 	void Update()
 	{
 		if (!placed)
 		{
-			// Collision check to prevent overlapping buildings
-			if (Rhand.triggerButtonUp)
-			{
-				RaycastHit hit;
-				if (Physics.Raycast(previewPlacement.transform.position + new Vector3(0, -10, 0), Vector3.up, out hit, Mathf.Infinity, tiles))
-				{
-					if (hit.collider != ownCollider)
-					{
-						if (hit.collider.tag == "Tile")
-						{
-							Destroy(gameObject);
-						}
-					}
-				}
 
-				if (Physics.Raycast(previewPlacement.transform.position + new Vector3(0, 10, 0), Vector3.down, out hit, Mathf.Infinity, tiles))
-				{
-					if (hit.collider != ownCollider)
-					{
-						if (hit.collider.tag == "Tile")
-						{
-							Destroy(gameObject);
-						}
-					}
-				}
+            // Collision check to prevent overlapping buildings
+            if (Rhand.triggerButtonUp)
+			{
+                if (!areaCheck.IsAreaFree())
+			    {
+			        if (lastSafePos != Vector3.zero)
+			        {
+                        transform.position = lastSafePos;
+                        transform.rotation = lastSafeRot;
+                    }
+			        else
+			        {
+                        Destroy(gameObject);
+                    }
+                    previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
+                }
+			    else
+			    {
+                    Debug.Log("1s");
+			        if (areaCheck.previewCount > 3)
+			        {
+                        var sfx = previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();
+                        sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
+                        sfx.Play();
+                    }
+			        else
+			        {
+                        Debug.Log("2s");
+                        var sfx = previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
+                        sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+                        sfx.Play();
+                    }
+                }
 
 				transform.position = Rhand.transform.position;
-
-				previewMesh.enabled = false;
 
 				placed = true;
 				root.isHolding = false;
@@ -66,22 +78,33 @@ public class DragAndPlace : MonoBehaviour
 			// Rotate handler, right direction
 			if (Rhand.touchpadRight && !hasRotated)
 			{
-				transform.Rotate(0, -90, 0);
+                var sfx = previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
+                sfx.pitch = 1.1f;
+                sfx.Play();
+
+                transform.Rotate(0, -90, 0);
 				hasRotated = true;
-			}
+            }
 
 			// Rotate handler, left direction
 			if (Rhand.touchpadLeft && !hasRotated)
 			{
-				transform.Rotate(0, 90, 0);
+                var sfx = previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
+                sfx.pitch = 0.9f;
+                sfx.Play();
+
+                transform.Rotate(0, 90, 0);
 				hasRotated = true;
 			}
 
 			// Delete the building in hand
 			if (Rhand.gripButtonDown)
 			{
-				root.isHolding = false;
-				previewMesh.enabled = false;
+                var sfx = previewPlacement.transform.FindChild("sfxDestroy").GetComponent<AudioSource>();
+                sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
+                sfx.Play();
+
+                root.isHolding = false;
 				Destroy(gameObject);
 			}
 
@@ -91,6 +114,10 @@ public class DragAndPlace : MonoBehaviour
 				hasRotated = false;
 			}
 		}
+		else
+		{
+            onceNotPlaced = false;
+        }
 
 		// TODO: Merge with other !placed above
 		if (!placed)
@@ -100,7 +127,6 @@ public class DragAndPlace : MonoBehaviour
 			float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
 			float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
 
-			previewMesh.enabled = true;
 			previewPlacement.transform.position = new Vector3(currentX, BUILD_HEIGHT, currentZ);
 
 			var temp = transform.position;
@@ -118,18 +144,29 @@ public class DragAndPlace : MonoBehaviour
 				temp.z = Mathf.Round(temp.z * snapInverse) / snapInverse;
 				temp.y = Mathf.Lerp(transform.position.y, BUILD_HEIGHT, BUILD_HEIGHT_LERP);
 				transform.position = temp;
-
-				AreaCheck ac = previewPlacement.GetComponent<AreaCheck>();
-				ac.CheckForValidCombo(gameObject);
 			}
-		}
-	}
+            if (!oncePlaced)
+            {
+                // run once when placed
+                areaCheck.DeletePreviews();
+                oncePlaced = true;
+            }
+        }
+    }
 
 	void OnTriggerStay(Collider other)
 	{
 		if (other.tag == "Rhand" && Rhand.triggerButtonDown && !root.isHolding)
 		{
-			placed = false;
+            areaCheck.NewPreviewArea();
+
+		    if (placed)
+		    {
+		        lastSafePos = transform.position;
+		        lastSafeRot = transform.rotation;
+            }
+
+            placed = false;
 			root.isHolding = true;
 		}
 	}

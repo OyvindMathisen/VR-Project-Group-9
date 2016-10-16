@@ -8,10 +8,16 @@ public class AreaCheck : MonoBehaviour {
 	private CheckCollision[] checkCollisions = new CheckCollision[8];
 	private GameObject[] buildings = new GameObject[8];
 	private string[] bNames = new string[8];
+    public LayerMask tiles;
 
-	public GameObject Villa;
+    public GameObject Preview;
+    public GameObject Villa;
 
-	void Awake()
+    private bool onceNotHolding;
+    public int previewCount;
+
+
+    void Awake()
 	{
 		for (var i = 0; i < 8; i++)
 		{
@@ -19,17 +25,78 @@ public class AreaCheck : MonoBehaviour {
 		}
 	}
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
 	void Update () {
-		
-	}
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            NewPreviewArea();
+            root.isHolding = true;
+        }
+    }
 
-	public void CheckForValidCombo(GameObject obj)
+    public void NewPreviewArea()
+    {
+        const int y = 200;
+        int x = -16, z = -16;
+
+        for (var i = 0; i < 25; i++)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + new Vector3(x, y, z), Vector3.down, out hit, Mathf.Infinity, tiles))
+            {
+                if (hit.collider.tag == "Tile")
+                {
+                    if (!hit.transform.GetComponent<DragAndPlace>().placed)
+                    {
+                        var newPreview = Instantiate(Preview, transform.position + new Vector3(x, 0, z), Quaternion.identity) as GameObject;
+                        newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform;
+                        newPreview.transform.localScale = Vector3.one;
+                        previewCount++;
+                    }
+                }
+            }
+
+            x += 8;
+            if (x != 16) continue;
+            z += 8;
+            x = -16;
+        }
+
+        onceNotHolding = false;
+    }
+
+    public void DeletePreviews()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.gameObject.name.StartsWith("Preview"))
+                Destroy(child.gameObject);
+        }
+        previewCount = 0;
+    }
+
+    public bool IsAreaFree()
+    {
+        foreach (Transform child in transform)
+        {
+            if (child.gameObject.name.StartsWith("Preview"))
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(child.position + new Vector3(0, -20, 0), Vector3.up, out hit, Mathf.Infinity, tiles))
+                {
+                    if (hit.collider.tag == "Tile")
+                    {
+                        if (hit.transform.GetComponent<DragAndPlace>().placed)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+	/*public void CheckForValidCombo(GameObject obj)
 	{
 		//var temp[] = new GameObject[8];
 		//temp[1].transform
@@ -110,5 +177,5 @@ public class AreaCheck : MonoBehaviour {
 			bNames[j] = "";
 		}
 
-    }
+    }*/
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class AreaCheck : MonoBehaviour {
 
-	public GameObject[] Checks;
 	private CheckCollision[] checkCollisions = new CheckCollision[8];
 	private GameObject[] buildings = new GameObject[8];
 	private string[] bNames = new string[8];
@@ -16,39 +15,64 @@ public class AreaCheck : MonoBehaviour {
     private bool onceNotHolding;
     public int previewCount;
 
+	// TODO: GJØR OM TIL ROOT VERDIER
+	private Vector3 curPosition;
+	private Wand Rhand;
+	private float snapInverse;
+	private float SNAP_VALUE = 8.0f;
+	private float BUILD_HEIGHT = 100.0f;
 
-    void Awake()
+	void Awake()
 	{
-		for (var i = 0; i < 8; i++)
-		{
-			checkCollisions[i] = Checks[i].GetComponent<CheckCollision>();
-		}
+		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
+		snapInverse = 1 / SNAP_VALUE;
 	}
 
-	void Update () {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            NewPreviewArea();
-            root.isHolding = true;
-        }
-    }
+	void Update ()
+	{
+		curPosition = Rhand.transform.position;
 
-    public void NewPreviewArea()
+		float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
+		float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
+
+		transform.position = new Vector3(currentX, BUILD_HEIGHT, currentZ);
+	}
+
+	/*
+	* @Parameter The building (cg, current gameobject) you're scanning for it's children to find out the position of the preview meshes.
+	*/
+    public void NewPreviewArea(GameObject cg)
     {
+		foreach (Transform child in cg.transform)
+		{
+			// TODO: replace 100 with a reference to DragAndPlace's BUILD_HEIGHT.
+			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, 100, child.transform.position.z), Quaternion.identity) as GameObject;
+			newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform.FindChild("Wrap");
+			newPreview.transform.localScale = Vector3.one;
+		}
+
+		/*
         const int y = 200;
         int x = -16, z = -16;
 
         for (var i = 0; i < 25; i++)
         {
+			// checking for buildings held from above
             RaycastHit hit;
-            if (Physics.Raycast(transform.position + new Vector3(x, y, z), Vector3.down, out hit, Mathf.Infinity, tiles))
+			Debug.Log("v");
+			if (Physics.Raycast(transform.position + new Vector3(x, y, z), Vector3.down, out hit, Mathf.Infinity, tiles))
             {
-                if (hit.collider.tag == "Tile")
+				// if the object is a tile
+				Debug.Log("0v");
+				if (hit.collider.tag == "Tile")
                 {
-                    if (!hit.transform.GetComponent<DragAndPlace>().placed)
+					// and if the object held is not placed yet
+					Debug.Log("1v");
+					if (!hit.transform.GetComponent<DragAndPlace>().placed)
                     {
-                        var newPreview = Instantiate(Preview, transform.position + new Vector3(x, 0, z), Quaternion.identity) as GameObject;
-                        newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform;
+						Debug.Log("2v");
+						var newPreview = Instantiate(Preview, transform.position + new Vector3(x, 0, z), Quaternion.identity) as GameObject;
+                        newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform.FindChild("Wrap");
                         newPreview.transform.localScale = Vector3.one;
                         previewCount++;
                     }
@@ -59,14 +83,16 @@ public class AreaCheck : MonoBehaviour {
             if (x != 16) continue;
             z += 8;
             x = -16;
+			
         }
 
         onceNotHolding = false;
-    }
+		*/
+	}
 
-    public void DeletePreviews()
+	public void DeletePreviews()
     {
-        foreach (Transform child in transform)
+        foreach (Transform child in transform.FindChild("Wrap"))
         {
             if (child.gameObject.name.StartsWith("Preview"))
                 Destroy(child.gameObject);

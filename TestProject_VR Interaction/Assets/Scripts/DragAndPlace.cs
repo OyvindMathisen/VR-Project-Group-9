@@ -29,12 +29,19 @@ public class DragAndPlace : MonoBehaviour
         areaCheck = previewPlacement.GetComponent<AreaCheck>();
 
 	    lastSafePos = Vector3.zero;
+
+		placed = false;
 	}
+
+	void Start()
+	{
+		areaCheck.NewPreviewArea(gameObject);
+	}
+
 	void Update()
 	{
 		if (!placed)
 		{
-
             // Collision check to prevent overlapping buildings
             if (Rhand.triggerButtonUp)
 			{
@@ -53,7 +60,6 @@ public class DragAndPlace : MonoBehaviour
                 }
 			    else
 			    {
-                    Debug.Log("1s");
 			        if (areaCheck.previewCount > 3)
 			        {
                         var sfx = previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();
@@ -62,14 +68,13 @@ public class DragAndPlace : MonoBehaviour
                     }
 			        else
 			        {
-                        Debug.Log("2s");
                         var sfx = previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
                         sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                         sfx.Play();
                     }
                 }
 
-				transform.position = Rhand.transform.position;
+				//transform.position = Rhand.transform.position;
 
 				placed = true;
 				root.isHolding = false;
@@ -84,7 +89,10 @@ public class DragAndPlace : MonoBehaviour
 
                 transform.Rotate(0, -90, 0);
 				hasRotated = true;
-            }
+
+				previewPlacement.transform.FindChild("Wrap").Rotate(0, -90, 0);
+				//areaCheck.DeletePreviews();
+			}
 
 			// Rotate handler, left direction
 			if (Rhand.touchpadLeft && !hasRotated)
@@ -95,6 +103,10 @@ public class DragAndPlace : MonoBehaviour
 
                 transform.Rotate(0, 90, 0);
 				hasRotated = true;
+
+				previewPlacement.transform.FindChild("Wrap").Rotate(0, 90, 0);
+				//areaCheck.DeletePreviews();
+				//areaCheck.NewPreviewArea();
 			}
 
 			// Delete the building in hand
@@ -105,6 +117,7 @@ public class DragAndPlace : MonoBehaviour
                 sfx.Play();
 
                 root.isHolding = false;
+				areaCheck.DeletePreviews();
 				Destroy(gameObject);
 			}
 
@@ -124,24 +137,26 @@ public class DragAndPlace : MonoBehaviour
 		{
 			Vector3 curPosition = Rhand.transform.position; 
 
-			float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
-			float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
+			//float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
+			//float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
 
-			previewPlacement.transform.position = new Vector3(currentX, BUILD_HEIGHT, currentZ);
+			//previewPlacement.transform.position = new Vector3(currentX, BUILD_HEIGHT, currentZ);
 
 			var temp = transform.position;
 			temp.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
 			temp.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
 			temp.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
 			transform.position = temp;
+
+			oncePlaced = false;
 		}
 		else
 		{
 			if (transform.position.y != BUILD_HEIGHT)
 			{
 				var temp = transform.position;
-				temp.x = Mathf.Round(temp.x * snapInverse) / snapInverse;
-				temp.z = Mathf.Round(temp.z * snapInverse) / snapInverse;
+				//temp.x = Mathf.Round(temp.x * snapInverse) / snapInverse;
+				//temp.z = Mathf.Round(temp.z * snapInverse) / snapInverse;
 				temp.y = Mathf.Lerp(transform.position.y, BUILD_HEIGHT, BUILD_HEIGHT_LERP);
 				transform.position = temp;
 			}
@@ -158,9 +173,11 @@ public class DragAndPlace : MonoBehaviour
 	{
 		if (other.tag == "Rhand" && Rhand.triggerButtonDown && !root.isHolding)
 		{
-            areaCheck.NewPreviewArea();
-
-		    if (placed)
+			Debug.Log("NewPreviewArea from DragAndPlace");
+			// areaCheck.Invoke("NewPreviewArea", 0.02f);
+			areaCheck.NewPreviewArea(gameObject);
+			
+			if (placed)
 		    {
 		        lastSafePos = transform.position;
 		        lastSafeRot = transform.rotation;

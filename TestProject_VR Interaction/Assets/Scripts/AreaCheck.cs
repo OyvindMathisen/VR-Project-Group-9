@@ -15,27 +15,27 @@ public class AreaCheck : MonoBehaviour {
     private bool onceNotHolding;
     public int previewCount;
 
-	// TODO: GJØR OM TIL ROOT VERDIER
 	private Vector3 curPosition;
 	private Wand Rhand;
-	private float snapInverse;
-	private float SNAP_VALUE = 8.0f;
-	private float BUILD_HEIGHT = 100.0f;
 
-	void Awake()
+    private const float offsetY = -4;
+
+
+    void Awake()
 	{
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
-		snapInverse = 1 / SNAP_VALUE;
 	}
 
 	void Update ()
 	{
-		curPosition = Rhand.transform.position;
+        // midlertidig sjekker om dette har noe å si for samsvarende posisjoner
+        // mellom previewplacement og bygninger: baserer curPosition på root.currentDrag hvis man holder
+	    curPosition = root.isHolding ? root.currentDrag.position : Rhand.transform.position;
 
-		float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
-		float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
+	    float currentX = Mathf.Round(curPosition.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+		float currentZ = Mathf.Round(curPosition.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
 
-		transform.position = new Vector3(currentX, BUILD_HEIGHT, currentZ);
+		transform.position = new Vector3(currentX, root.BUILD_HEIGHT-offsetY, currentZ);
 	}
 
 	/*
@@ -45,8 +45,7 @@ public class AreaCheck : MonoBehaviour {
     {
 		foreach (Transform child in cg.transform)
 		{
-			// TODO: replace 100 with a reference to DragAndPlace's BUILD_HEIGHT.
-			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, 100, child.transform.position.z), Quaternion.identity) as GameObject;
+			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, root.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
 			newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform.FindChild("Wrap");
 			newPreview.transform.localScale = Vector3.one;
 		}

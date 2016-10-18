@@ -3,11 +3,8 @@ using UnityEngine;
 
 public class DragAndPlace : MonoBehaviour
 {
-	private float BUILD_HEIGHT = 100.0f, BUILD_HEIGHT_LERP = 15.0f; // make the tiles stay at a certain height
 	public bool placed; // if the tile is still "dragged" around (the mouse button is not released yet)
-    private bool oncePlaced, onceNotPlaced;
-    private float SNAP_VALUE = 8.0f; // important for choosing grid size (do not edit unless you edit the tile sizes)
-	float snapInverse;
+    private bool oncePlaced, onceNotPlaced, reachedHeight;
 	private Wand Rhand;
 	private bool hasRotated;
 	public LayerMask tiles;
@@ -21,7 +18,6 @@ public class DragAndPlace : MonoBehaviour
 
 	void Awake()
 	{
-		snapInverse = 1 / SNAP_VALUE;
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
 
 		previewPlacement = GameObject.Find("PreviewPlacement");
@@ -30,7 +26,12 @@ public class DragAndPlace : MonoBehaviour
 
 	    lastSafePos = Vector3.zero;
 
-		placed = false;
+        // if placed is true to begin with, it's probably a combined building
+	    if (placed)
+	    {
+	        reachedHeight = true;
+	        oncePlaced = true;
+	    }
 	}
 
 	void Start()
@@ -42,6 +43,13 @@ public class DragAndPlace : MonoBehaviour
 	{
 		if (!placed)
 		{
+            if (!onceNotPlaced)
+            {
+                // run once when still in air
+                root.currentDrag = transform;
+                onceNotPlaced = true;
+            }
+
             // Collision check to prevent overlapping buildings
             if (Rhand.triggerButtonUp)
 			{
@@ -57,21 +65,6 @@ public class DragAndPlace : MonoBehaviour
                         Destroy(gameObject);
                     }
                     previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
-                }
-			    else
-			    {
-			        if (areaCheck.previewCount > 3)
-			        {
-                        var sfx = previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();
-                        sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
-                        sfx.Play();
-                    }
-			        else
-			        {
-                        var sfx = previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
-                        sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
-                        sfx.Play();
-                    }
                 }
 
 				//transform.position = Rhand.transform.position;
@@ -126,46 +119,67 @@ public class DragAndPlace : MonoBehaviour
 			{
 				hasRotated = false;
 			}
-		}
-		else
-		{
-            onceNotPlaced = false;
+
+            // This follows Rhand 
+            Vector3 curPosition = Rhand.transform.position;
+            var temp = transform.position;
+            temp.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
+            temp.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
+            temp.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
+            transform.position = temp;
+
+            oncePlaced = false;
+            reachedHeight = false;
         }
-
-		// TODO: Merge with other !placed above
-		if (!placed)
-		{
-			Vector3 curPosition = Rhand.transform.position; 
-
-			//float currentX = Mathf.Round(curPosition.x * snapInverse) / snapInverse;
-			//float currentZ = Mathf.Round(curPosition.z * snapInverse) / snapInverse;
-
-			//previewPlacement.transform.position = new Vector3(currentX, BUILD_HEIGHT, currentZ);
-
-			var temp = transform.position;
-			temp.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
-			temp.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
-			temp.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
-			transform.position = temp;
-
-			oncePlaced = false;
-		}
 		else
 		{
-			if (transform.position.y != BUILD_HEIGHT)
-			{
-				var temp = transform.position;
-				//temp.x = Mathf.Round(temp.x * snapInverse) / snapInverse;
-				//temp.z = Mathf.Round(temp.z * snapInverse) / snapInverse;
-				temp.y = Mathf.Lerp(transform.position.y, BUILD_HEIGHT, BUILD_HEIGHT_LERP);
-				transform.position = temp;
-			}
+            if (transform.position.y != root.BUILD_HEIGHT)
+            {
+                transform.Translate(0, -0.8f, 0);
+                if (transform.position.y < root.BUILD_HEIGHT + 1f)
+                {
+                    var temp = transform.position;
+                    temp.y = root.BUILD_HEIGHT;
+                    transform.position = temp;
+                }
+            }
+            // When a building lands
+            if (transform.position.y > root.BUILD_HEIGHT - 4f && transform.position.y < root.BUILD_HEIGHT + 4f && !reachedHeight)
+            {
+                if (areaCheck.previewCount > 3)
+                {
+                    var sfx = previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();
+                    sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
+                    sfx.Play();
+                }
+                else
+                {
+                    var sfx = previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
+                    sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+                    sfx.Play();
+                }
+                // particle effect for every tile in placed building
+                foreach (Transform child in transform)
+                {
+                    var fx = Instantiate(Resources.Load("FogExplosion", typeof(GameObject)), new Vector3(child.transform.position.x, root.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
+                    foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>())
+                        ps.Play();
+                }
+                reachedHeight = true;
+            }
             if (!oncePlaced)
             {
                 // run once when placed
+                var temp = areaCheck.transform.position; // transform.position
+                temp.x = Mathf.Round(temp.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+                temp.z = Mathf.Round(temp.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+                transform.position = temp;
+
                 areaCheck.DeletePreviews();
                 oncePlaced = true;
             }
+
+            onceNotPlaced = false;
         }
     }
 

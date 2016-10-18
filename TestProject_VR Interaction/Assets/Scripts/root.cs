@@ -3,21 +3,27 @@ using System.Collections;
 
 // GLOBAL VARIABLES CLASS
 public class root : MonoBehaviour {
-
-	public static Vector3 _screenPoint;
-    public static Vector3 _offset;
-    public static Quaternion previewRotation;
-
-    public static KeyCode nextPreviewKey = KeyCode.X;
-    public static KeyCode prevPreviewKey = KeyCode.Z;
-
     public static bool isHolding = false;
 
-    // temporary mouse control notes:
-    // - right click while dragging to rotate 90 degrees
-    // - left click a placed tile to delete it
-    // - X and Z scrolls through tiles, while 1 and 2 are tile category/type
-    // - hold tab for centered mouse
-    
-    // WASD or arrow keys to rotate and move forward (can also use Q and E to rotate fast)
+    /// <summary>
+    /// make the tiles stay at a certain height
+    /// </summary>
+    public static float BUILD_HEIGHT = 100.0f;
+    /// <summary>
+    /// value for smooth tile height management
+    /// </summary>
+    public static float BUILD_HEIGHT_LERP = 0.15f;
+    /// <summary>
+    /// important for choosing grid size (do not edit unless you edit the tile sizes)
+    /// </summary>
+    public static float SNAP_VALUE = 8.0f;
+    /// <summary>
+    /// 1 / SNAP_VALUE;
+    /// </summary>
+    public static float SNAP_INVERSE = 0.125f;
+    /// <summary>
+    /// the current object you're holding / dragging around
+    /// (usually a building you haven't placed yet)
+    /// </summary>
+    public static Transform currentDrag;
 }

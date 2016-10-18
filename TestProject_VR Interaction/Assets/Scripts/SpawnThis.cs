@@ -5,11 +5,8 @@ public class SpawnThis : MonoBehaviour
 	public Transform ObjectToSpawn;
 	private Wand Rhand;
 	private bool ObjectSpawned = false;
-	private GameObject go;
-	// Use this for initialization
-	void Awake () {
-        transform.rotation = root.previewRotation;
 
+	void Awake () {
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
 	}
 

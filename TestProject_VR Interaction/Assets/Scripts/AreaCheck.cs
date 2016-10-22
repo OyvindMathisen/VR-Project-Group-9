@@ -24,13 +24,17 @@ public class AreaCheck : MonoBehaviour {
     void Awake()
 	{
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
+		root.currentDrag = Rhand.transform; // Setting currentDrag to a value to prevent accessing a blank variable.
 	}
 
 	void Update ()
 	{
-        // midlertidig sjekker om dette har noe å si for samsvarende posisjoner
-        // mellom previewplacement og bygninger: baserer curPosition på root.currentDrag hvis man holder
-	    curPosition = root.isHolding ? root.currentDrag.position : Rhand.transform.position;
+		// TODO: Tile is placed one off in the opposite Z direction of the side you grab the tile. This needs to be fixed.
+
+		if (root.isHolding && root.currentDrag != null)
+			curPosition = root.currentDrag.position;
+		else
+			curPosition = Rhand.transform.position;
 
 	    float currentX = Mathf.Round(curPosition.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
 		float currentZ = Mathf.Round(curPosition.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
@@ -43,6 +47,7 @@ public class AreaCheck : MonoBehaviour {
 	*/
     public void NewPreviewArea(GameObject cg)
     {
+		DeletePreviews();
 		foreach (Transform child in cg.transform)
 		{
 			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, root.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;

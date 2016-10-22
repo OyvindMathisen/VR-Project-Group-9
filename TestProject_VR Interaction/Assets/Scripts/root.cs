@@ -25,5 +25,9 @@ public class root : MonoBehaviour {
     /// the current object you're holding / dragging around
     /// (usually a building you haven't placed yet)
     /// </summary>
-    public static Transform currentDrag;
+	public static Transform currentDrag;
+	/// <summary>
+	/// The distance between your hand and the building you're trying to pick up.
+	/// </summary>
+	public static Vector3 distToHand;
 }

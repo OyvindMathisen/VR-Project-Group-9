@@ -43,12 +43,14 @@ public class DragAndPlace : MonoBehaviour
 	{
 		if (!placed)
 		{
-            if (!onceNotPlaced)
-            {
-                // run once when still in air
-                root.currentDrag = transform;
-                onceNotPlaced = true;
-            }
+			root.currentDrag = transform;
+			if (!onceNotPlaced)
+			{
+				// run once when still in air
+				root.distToHand = transform.position - Rhand.transform.position;
+
+				onceNotPlaced = true;
+			}
 
             // Collision check to prevent overlapping buildings
             if (Rhand.triggerButtonUp)
@@ -121,8 +123,8 @@ public class DragAndPlace : MonoBehaviour
 			}
 
             // This follows Rhand 
-            Vector3 curPosition = Rhand.transform.position;
-            var temp = transform.position;
+			Vector3 curPosition = Rhand.transform.position + root.distToHand;
+			Vector3 temp = Vector3.zero;
             temp.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
             temp.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
             temp.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
@@ -135,7 +137,7 @@ public class DragAndPlace : MonoBehaviour
 		{
             if (transform.position.y != root.BUILD_HEIGHT)
             {
-                transform.Translate(0, -0.8f, 0);
+				transform.Translate(0, -0.8f, 0);
                 if (transform.position.y < root.BUILD_HEIGHT + 1f)
                 {
                     var temp = transform.position;
@@ -170,15 +172,17 @@ public class DragAndPlace : MonoBehaviour
             if (!oncePlaced)
             {
                 // run once when placed
-                var temp = areaCheck.transform.position; // transform.position
-                temp.x = Mathf.Round(temp.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-                temp.z = Mathf.Round(temp.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-                transform.position = temp;
+				areaCheck.DeletePreviews();
 
-                areaCheck.DeletePreviews();
+				var temp = areaCheck.transform.position;
+                // temp.x = Mathf.Round(temp.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+                // temp.z = Mathf.Round(temp.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+				temp.y = transform.position.y;
+                transform.position = temp;
+               
                 oncePlaced = true;
             }
-
+				
             onceNotPlaced = false;
         }
     }
@@ -187,10 +191,11 @@ public class DragAndPlace : MonoBehaviour
 	{
 		if (other.tag == "Rhand" && Rhand.triggerButtonDown && !root.isHolding)
 		{
-			Debug.Log("NewPreviewArea from DragAndPlace");
 			// areaCheck.Invoke("NewPreviewArea", 0.02f);
 			areaCheck.NewPreviewArea(gameObject);
-			
+
+			root.distToHand = transform.position - Rhand.transform.position;
+
 			if (placed)
 		    {
 		        lastSafePos = transform.position;

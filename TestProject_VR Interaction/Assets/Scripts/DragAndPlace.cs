@@ -16,7 +16,9 @@ public class DragAndPlace : MonoBehaviour
     private Vector3 lastSafePos;
     private Quaternion lastSafeRot;
 
-	void Awake()
+    private Vector3 distToHand; // The distance between Rhand and this building.
+
+    void Awake()
 	{
 		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
 
@@ -37,7 +39,9 @@ public class DragAndPlace : MonoBehaviour
 	void Start()
 	{
 		areaCheck.NewPreviewArea(gameObject);
-	}
+        distToHand = transform.position - Rhand.transform.position;
+        root.distToPP = areaCheck.transform.position - transform.position;
+    }
 
 	void Update()
 	{
@@ -47,7 +51,7 @@ public class DragAndPlace : MonoBehaviour
 			if (!onceNotPlaced)
 			{
 				// run once when still in air
-				root.distToHand = transform.position - Rhand.transform.position;
+				
 
 				onceNotPlaced = true;
 			}
@@ -86,7 +90,6 @@ public class DragAndPlace : MonoBehaviour
 				hasRotated = true;
 
 				previewPlacement.transform.FindChild("Wrap").Rotate(0, -90, 0);
-				//areaCheck.DeletePreviews();
 			}
 
 			// Rotate handler, left direction
@@ -100,8 +103,6 @@ public class DragAndPlace : MonoBehaviour
 				hasRotated = true;
 
 				previewPlacement.transform.FindChild("Wrap").Rotate(0, 90, 0);
-				//areaCheck.DeletePreviews();
-				//areaCheck.NewPreviewArea();
 			}
 
 			// Delete the building in hand
@@ -123,8 +124,8 @@ public class DragAndPlace : MonoBehaviour
 			}
 
             // This follows Rhand 
-			Vector3 curPosition = Rhand.transform.position + root.distToHand;
-			Vector3 temp = Vector3.zero;
+			var curPosition = Rhand.transform.position + distToHand;
+			var temp = Vector3.zero;
             temp.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
             temp.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
             temp.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
@@ -135,6 +136,21 @@ public class DragAndPlace : MonoBehaviour
         }
 		else
 		{
+            if (!oncePlaced)
+            {
+                // run once when placed
+                areaCheck.DeletePreviews();
+
+                var temp = transform.position; // previously areaCheck's position
+                temp.x = Mathf.Round(temp.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+                temp.z = Mathf.Round(temp.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+                temp.y = transform.position.y;
+                transform.position = temp;
+
+                oncePlaced = true;
+            }
+
+            // while the building is not at specified height
             if (transform.position.y != root.BUILD_HEIGHT)
             {
 				transform.Translate(0, -0.8f, 0);
@@ -169,20 +185,6 @@ public class DragAndPlace : MonoBehaviour
                 }
                 reachedHeight = true;
             }
-            if (!oncePlaced)
-            {
-                // run once when placed
-				areaCheck.DeletePreviews();
-
-				var temp = areaCheck.transform.position;
-                // temp.x = Mathf.Round(temp.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-                // temp.z = Mathf.Round(temp.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-				temp.y = transform.position.y;
-                transform.position = temp;
-               
-                oncePlaced = true;
-            }
-				
             onceNotPlaced = false;
         }
     }
@@ -193,8 +195,8 @@ public class DragAndPlace : MonoBehaviour
 		{
 			// areaCheck.Invoke("NewPreviewArea", 0.02f);
 			areaCheck.NewPreviewArea(gameObject);
-
-			root.distToHand = transform.position - Rhand.transform.position;
+			distToHand = transform.position - Rhand.transform.position;
+		    root.distToPP = areaCheck.transform.position - transform.position;
 
 			if (placed)
 		    {

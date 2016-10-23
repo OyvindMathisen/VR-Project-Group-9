@@ -32,7 +32,7 @@ public class AreaCheck : MonoBehaviour {
 		// TODO: Tile is placed one off in the opposite Z direction of the side you grab the tile. This needs to be fixed.
 
 		if (root.isHolding && root.currentDrag != null)
-			curPosition = root.currentDrag.position;
+			curPosition = root.currentDrag.position + root.distToPP;
 		else
 			curPosition = Rhand.transform.position;
 

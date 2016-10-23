@@ -26,8 +26,8 @@ public class root : MonoBehaviour {
     /// (usually a building you haven't placed yet)
     /// </summary>
 	public static Transform currentDrag;
-	/// <summary>
-	/// The distance between your hand and the building you're trying to pick up.
+    /// <summary>
+	/// The distance between PreviewPlacement and the building you're trying to pick up.
 	/// </summary>
-	public static Vector3 distToHand;
+	public static Vector3 distToPP;
 }

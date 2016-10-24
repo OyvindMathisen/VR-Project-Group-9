@@ -30,8 +30,9 @@ public class DragAndPlace : MonoBehaviour
 
 	void Start()
 	{
-		_areaCheck.NewPreviewArea(gameObject);
-        _distToHand = transform.position - _controller.transform.position;
+		_distToHand = transform.position - _controller.transform.position;
+		if (!Placed)
+		_areaCheck.NewPreviewArea(gameObject);  
     }
 
 	void Update()

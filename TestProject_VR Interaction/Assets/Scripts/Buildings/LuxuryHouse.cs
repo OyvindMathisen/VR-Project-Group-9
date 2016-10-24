@@ -6,16 +6,17 @@ public class LuxuryHouse : MonoBehaviour {
     public GameObject Villa;
 
     // tile size
-    private float _xPos;
-	private float _zPos;
+    private float _xSize;
+	private float _zSize;
 
 	private LayerMask _tiles;
     private bool _combined;
+	private AreaCheck _areaCheck;
 
 	void Awake ()
 	{
-	    _xPos = _zPos = GameSettings.SNAP_VALUE;
-	    _tiles = transform.GetComponent<DragAndPlace>().Tiles;
+	    _xSize = _zSize = GameSettings.SNAP_VALUE;
+		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
 	}
 
 	void Update () {
@@ -33,10 +34,10 @@ public class LuxuryHouse : MonoBehaviour {
 	    for (var i = 0; i < xPos.Length; i++)
 	    {
 	        RaycastHit hit;
-	        if (Physics.Raycast(transform.position + transform.right * _xPos * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zPos * zPos[i], Vector3.down, out hit, 10, _tiles))
+			if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 10, _tiles))
 	        {
 	            if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed || !hit.transform.name.StartsWith("House")) continue;
-	            var tile = Instantiate(Villa, transform.position + transform.right * _xPos * xAdj[i] + transform.forward * _zPos * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
+				var tile = Instantiate(Villa, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
 	            Destroy(hit.transform.gameObject);
 	            Destroy(gameObject);
 	            _combined = true;

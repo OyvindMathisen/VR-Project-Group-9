@@ -4,14 +4,20 @@ using System.Collections;
 public class ChangePlayerSize : MonoBehaviour {
 
 	public GameObject CameraRig;
-	public GameObject panel;
+	public GameObject Panel;
+    public GameObject LeftController;
 
-	private Wand Lhand;
-	private bool isShrunk;
+	private Wand _Lhand;
+	private bool _isShrunk;
+
+    private SteamVR_LaserPointer _laser;
+    private SteamVR_Teleporter _teleport;
 
 	void Awake ()
 	{
-		Lhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (left)").GetComponent<Wand>();
+		_Lhand = LeftController.GetComponent<Wand>();
+	    _laser = LeftController.GetComponent<SteamVR_LaserPointer>();
+	    _teleport = LeftController.GetComponent<SteamVR_Teleporter>();
 	}
 
 	// Use this for initialization
@@ -20,29 +26,29 @@ public class ChangePlayerSize : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		if (Lhand.gripButtonDown)
-		{
-			if (isShrunk)
-			{
-				CameraRig.transform.localScale = new Vector3(100.0f, 100.0f, 100.0f);
-				CameraRig.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+	void Update ()
+	{
+	    if (!_Lhand.GripButtonDown) return;
 
-				panel.SetActive(true);
-				GetComponent<SteamVR_LaserPointer>().active = false;
-				GetComponent<SteamVR_Teleporter>().teleportOnClick = false;
-				isShrunk = false;
-			}
-			else
-			{
-				CameraRig.transform.localScale = new Vector3(0.55f, 0.55f, 0.55f);
-				CameraRig.transform.position = new Vector3(0.0f, 101.0f, 5.5f);
+	    if (_isShrunk)
+	    {
+	        CameraRig.transform.localScale = new Vector3(100.0f, 100.0f, 100.0f);
+	        CameraRig.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
 
-				panel.SetActive(false);
-				GetComponent<SteamVR_LaserPointer>().active = true;
-				GetComponent<SteamVR_Teleporter>().teleportOnClick = true;
-				isShrunk = true;
-			}
-		}
+	        Panel.SetActive(true);
+	        _laser.active = false;
+	        _teleport.teleportOnClick = false;
+	        _isShrunk = false;
+	    }
+	    else
+	    {
+	        CameraRig.transform.localScale = new Vector3(0.55f, 0.55f, 0.55f);
+	        CameraRig.transform.position = new Vector3(0.0f, 101.0f, 5.5f);
+
+	        Panel.SetActive(false);
+	        _laser.active = true;
+	        _teleport.teleportOnClick = true;
+	        _isShrunk = true;
+	    }
 	}
 }

@@ -5,6 +5,7 @@ public class DragAndPlace : MonoBehaviour
 {
     public bool Placed; // if the tile is still "dragged" around (the mouse button is not released yet)
     public LayerMask Tiles;
+    public float BuildingFallSpeed = 1.5f;
 
     private GameObject _previewPlacement;
     private GameObject _rightController;
@@ -32,7 +33,8 @@ public class DragAndPlace : MonoBehaviour
 	{
 		_distToHand = transform.position - _controller.transform.position;
 		if (!Placed)
-		_areaCheck.NewPreviewArea(gameObject);  
+		_areaCheck.NewPreviewArea(gameObject);
+        _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
     }
 
 	void Update()
@@ -40,6 +42,8 @@ public class DragAndPlace : MonoBehaviour
         // If the building has yet to be placed.
 		if (!Placed)
 		{
+            _areaCheck.HeldObject = transform;
+
             // Collision check to prevent overlapping buildings
             if (_controller.TriggerButtonUp)
             {
@@ -64,27 +68,39 @@ public class DragAndPlace : MonoBehaviour
 			// Rotate handler, right direction
 			if (_controller.TouchpadRight && !_hasRotated)
 			{
+                /* // Force rotation around the center of the controller.
+                transform.position = Rhand.transform.position;
+                areaCheck.transform.position = transform.position;
+                distToHand = transform.position - Rhand.transform.position;
+                _areaCheck.distanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
+                //*/
                 var sfx = _previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
                 sfx.pitch = 1.1f;
-                sfx.Play();
-
-                transform.Rotate(0, -90, 0);
-				_hasRotated = true;
-
-				_previewPlacement.transform.FindChild("Wrap").Rotate(0, -90, 0);
-			}
-
-			// Rotate handler, left direction
-			if (_controller.TouchpadLeft && !_hasRotated)
-			{
-                var sfx = _previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
-                sfx.pitch = 0.9f;
                 sfx.Play();
 
                 transform.Rotate(0, 90, 0);
 				_hasRotated = true;
 
 				_previewPlacement.transform.FindChild("Wrap").Rotate(0, 90, 0);
+			}
+
+			// Rotate handler, left direction
+			if (_controller.TouchpadLeft && !_hasRotated)
+			{
+                /* // Force rotation around the center of the controller.
+                transform.position = Rhand.transform.position;
+                areaCheck.transform.position = transform.position;
+                distToHand = transform.position - Rhand.transform.position;
+                _areaCheck.distanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
+                //*/
+                var sfx = _previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
+                sfx.pitch = 0.9f;
+                sfx.Play();
+
+                transform.Rotate(0, -90, 0);
+				_hasRotated = true;
+
+				_previewPlacement.transform.FindChild("Wrap").Rotate(0, -90, 0);
 			}
 
 			// Delete the building in hand
@@ -128,7 +144,7 @@ public class DragAndPlace : MonoBehaviour
             // while the building is not at specified height
             if (!transform.position.y.Equals(GameSettings.BUILD_HEIGHT))
             {
-				transform.Translate(0, -0.8f, 0);
+				transform.Translate(0, -BuildingFallSpeed, 0);
 
                 // If the building is below the intended height.
                 if (transform.position.y < GameSettings.BUILD_HEIGHT + 1f)
@@ -182,10 +198,11 @@ public class DragAndPlace : MonoBehaviour
 	void OnTriggerStay(Collider other)
 	{
 	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown || _controller.IsHolding) return;
-	    _areaCheck.NewPreviewArea(gameObject);
-	    _distToHand = transform.position - _controller.transform.position;
+        _areaCheck.NewPreviewArea(gameObject);
+        _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
+        _distToHand = transform.position - _controller.transform.position;
 
-	    if (Placed)
+        if (Placed)
 	    {
 	        _lastSafePos = transform.position;
 	        _lastSafeRot = transform.rotation;

@@ -49,7 +49,6 @@ public class Wand : MonoBehaviour
 
         if (_device.GetPress(SteamVR_Controller.ButtonMask.Touchpad))
         {
-            // Vector2 touchpad = (_device.GetAxis(Valve.VR.EVRButtonId.k_EButton_Axis0));
             Vector2 touchpad = (_device.GetAxis());
             TouchpadUp = touchpad.y > TouchpadDetectLimit;
             TouchpadDown = touchpad.y < -TouchpadDetectLimit;

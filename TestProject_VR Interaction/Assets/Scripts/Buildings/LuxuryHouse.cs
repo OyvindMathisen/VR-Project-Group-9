@@ -37,7 +37,7 @@ public class LuxuryHouse : MonoBehaviour {
 			if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 10, _tiles))
 	        {
 	            if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed || !hit.transform.name.StartsWith("House")) continue;
-				var tile = Instantiate(Villa, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
+				Instantiate(Villa, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
 	            Destroy(hit.transform.gameObject);
 	            Destroy(gameObject);
 	            _combined = true;

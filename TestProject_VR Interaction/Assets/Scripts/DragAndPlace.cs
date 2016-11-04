@@ -177,10 +177,14 @@ public class DragAndPlace : MonoBehaviour
 		        foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>())
 		            ps.Play();
 		    }
-		    _reachedHeight = true;
+            OnPlaced();
 		}
     }
 
+    protected virtual void OnPlaced()
+    {
+		_reachedHeight = true;
+    }
     private void SetBuildingPosition()
     {
         // Delete old previews lingering on the map

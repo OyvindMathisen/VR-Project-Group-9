@@ -15,7 +15,7 @@ public class DragAndPlace : MonoBehaviour
     private AreaCheck _areaCheck;
     private Quaternion _lastSafeRot;
 
-    void Awake()
+    protected virtual void Awake()
 	{
         _rightController = GameObject.FindWithTag("Rhand");
         _previewPlacement = GameObject.FindWithTag("PreviewPlacement");
@@ -37,7 +37,7 @@ public class DragAndPlace : MonoBehaviour
         _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
     }
 
-	void Update()
+	protected virtual void Update()
 	{
         // If the building has yet to be placed.
 		if (!Placed)
@@ -135,7 +135,6 @@ public class DragAndPlace : MonoBehaviour
         // If the building has been placed.
 		else
 		{
-            
             if (!_oncePlaced)
             {
                 SetBuildingPosition();
@@ -177,14 +176,17 @@ public class DragAndPlace : MonoBehaviour
 		        foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>())
 		            ps.Play();
 		    }
+            // Runs the Child script ComboParent.OnPlaced();
             OnPlaced();
 		}
     }
 
+    // Placeholder method if child ComboParent has not been made.
     protected virtual void OnPlaced()
     {
 		_reachedHeight = true;
     }
+
     private void SetBuildingPosition()
     {
         // Delete old previews lingering on the map
@@ -201,7 +203,7 @@ public class DragAndPlace : MonoBehaviour
 
 	void OnTriggerStay(Collider other)
 	{
-	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown || _controller.IsHolding) return;
+	    if (_controller == null || other.tag != "Rhand" || !_controller.TriggerButtonDown || _controller.IsHolding) return;
         _areaCheck.NewPreviewArea(gameObject);
         _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
         _distToHand = transform.position - _controller.transform.position;

@@ -35,18 +35,20 @@ public abstract class ComboParent : DragAndPlace
          * If there is no combo to make, tell the buildings to check if they can make
          * a combination now.
          */
-        if (CheckSurroundingTiles()) return;
+        if (CheckSurroundingTiles())
+			return;
         AlertSurroundingTiles();
     }
     protected override void Update()
     {
         base.Update();
 
-        // Debug to check if raycasting has been done correctly.
+		/* // Debug to check if raycasting has been done correctly.
         for (var i = 0; i < xPos.Length; i++)
         {
             Debug.DrawLine(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], new Vector3(1, 0, 0), Color.red);
         }
+		//*/
     }
     public virtual bool CheckSurroundingTiles()
     {

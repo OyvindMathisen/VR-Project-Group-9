@@ -155,6 +155,7 @@ public class DragAndPlace : MonoBehaviour
             }
             // Preformed when a building lands on the intended height.
 		    if (!(transform.position.y > GameSettings.BUILD_HEIGHT - 4f) || !(transform.position.y < GameSettings.BUILD_HEIGHT + 4f) || _reachedHeight) return;
+
 		    if (_areaCheck.PreviewCount > 3)
 		    {
 		        var sfx = _previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();

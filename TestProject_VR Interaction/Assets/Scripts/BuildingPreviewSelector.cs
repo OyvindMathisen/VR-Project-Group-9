@@ -15,10 +15,10 @@ public class BuildingPreviewSelector : MoveObject
 	{
 		base.Update ();
 
-		if (_rightHolding)
+		if (RightHolding)
 			RightControllerCheck();
 
-		if (_leftHolding)
+		if (LeftHolding)
 			LeftControllerCheck();
 	}
 
@@ -28,13 +28,13 @@ public class BuildingPreviewSelector : MoveObject
 		// TODO: Consider changing this for a swipe.
 		// Also, needs to be more visible to the player they can
 		// indeed change category this way.
-		if (_controllerScriptRight.TouchpadUp && !_hasChanged)
+		if (ControllerScriptRight.TouchpadUp && !_hasChanged)
 		{
 			_categoryPosition++;
 			SetActiveCategory();
 		}
 
-		if (_controllerScriptRight.TouchpadDown && !_hasChanged)
+		if (ControllerScriptRight.TouchpadDown && !_hasChanged)
 		{
 			_categoryPosition--;
 			SetActiveCategory();
@@ -42,27 +42,27 @@ public class BuildingPreviewSelector : MoveObject
 
 		// Allow the user to scroll through the list again
 		// after releasing the touchpad button.
-		if (!_controllerScriptRight.TouchpadUp &&
-			!_controllerScriptRight.TouchpadDown)
+		if (!ControllerScriptRight.TouchpadUp &&
+			!ControllerScriptRight.TouchpadDown)
 			_hasChanged = false;
 	}
 
 	private void LeftControllerCheck()
 	{
-		if (_controllerScriptLeft.TouchpadUp && !_hasChanged)
+		if (ControllerScriptLeft.TouchpadUp && !_hasChanged)
 		{
 			_categoryPosition++;
 			SetActiveCategory();
 		}
 
-		if (_controllerScriptLeft.TouchpadDown && !_hasChanged)
+		if (ControllerScriptLeft.TouchpadDown && !_hasChanged)
 		{
 			_categoryPosition--;
 			SetActiveCategory();
 		}
 
-		if (!_controllerScriptLeft.TouchpadUp &&
-			!_controllerScriptLeft.TouchpadDown)
+		if (!ControllerScriptLeft.TouchpadUp &&
+			!ControllerScriptLeft.TouchpadDown)
 			_hasChanged = false;
 	}
 

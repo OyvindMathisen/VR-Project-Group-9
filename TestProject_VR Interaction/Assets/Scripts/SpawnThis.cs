@@ -3,12 +3,16 @@
 public class SpawnThis : MonoBehaviour
 {
 	public Transform ObjectToSpawn;
-    private GameObject _rightHand;
+
+	[Header("Initial Spawn Rotation")]
+	public float XRotation = 0;
+	public float YRotation = 0;
+	public float ZRotation = 0;
+
 	private Wand _controller;
 
 	void Start ()
     {
-		_rightHand = HMDComponents.getRightController();
 		_controller = HMDComponents.getRightWand();
 	}
 
@@ -16,8 +20,13 @@ public class SpawnThis : MonoBehaviour
 	{
 	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown) return;
 
-	    Instantiate(ObjectToSpawn, _controller.transform.position, Quaternion.identity);
-
+	    var currentTile = Instantiate(ObjectToSpawn, _controller.transform.position, Quaternion.identity) as GameObject;
+		if (!currentTile) // Is currentTile is null.
+		{
+			Debug.Log("Unable to instansiate object. Instansiation cancelled.");
+			return;
+		}
+		currentTile.transform.Rotate(new Vector3(XRotation, YRotation, ZRotation)); // Rotate the building the requested amount.
 	    _controller.IsHolding = true;
 	}
 }

@@ -1,33 +1,86 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
+using System.Collections.Generic;
 
-public class LuxuryHouse : ComboParent {
+public class LuxuryHouse : MonoBehaviour {
 
-    public GameObject resultVilla; // Result of villa combo.
-    // public GameObject OtherResult; // Example if you can make several combinations with this building
+    public GameObject Villa, Mansion;
 
-	protected override void Awake ()
+    // tile size
+    private float _xSize;
+	private float _zSize;
+
+	private LayerMask _tiles;
+    private Combiner _combiner;
+    private List<GameObject> _trashCan = new List<GameObject>();
+
+    private int[] xPos, zPos, xAdj, zAdj, rotAdj;
+
+    private int lh_count;
+	void Awake ()
 	{
-        base.Awake();
+	    _xSize = _zSize = GameSettings.SNAP_VALUE;
 		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
+	    _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
 
-        // Positions to check
-        xPos = new[] { 1, 1, -1, -1 };
-        zPos = new [] { 0, 1, 0, 1 };
+        // raycast positions (valid tiles for the combo) from "main" tile (transform.position), where "1" is 8 units
+         xPos = new [] { 1, 1, -1, -1, -1, -1, 1, 1 };
+         zPos = new [] { 0, 1,  0,  1,  0,  1, 1, 0 };
 
-        xAdj = new[] { 0, 0, 0, 0 }; // <- (atm this is useless, but probably need for other kinds of combos)
-        zAdj = new[] { 0, 1, 0, 1 };
-        rotAdj = new[] { 0, 90, -90, -180 };
-
+        // Instantiated building position and rotation adjustment
+         xAdj = new [] { 0, 0,  0,  0,  0,  0, 0, 0 };
+         zAdj = new [] { 0, 1,  0,  1,  0,  0, 0, 0 };
+         rotAdj = new[] { 0, 90, -90, -180, 0, 0, 0, 0 };
     }
-    protected override GameObject MakeCombo(string buildingName)
+
+    void CheckForCombos(bool combine)
     {
-        // Needs one if statement per possible combination.
-        if (buildingName.StartsWith("House"))
+        _trashCan.Clear();
+        lh_count = 0;
+
+        for (var i = 0; i < xPos.Length; i++)
         {
-            return resultVilla;
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 10, _tiles))
+            {
+                if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
+
+                GameObject result;
+                if (hit.transform.name.StartsWith("House") && i < 4)
+                {
+                    _trashCan.Add(hit.transform.gameObject);
+                    result = Villa;
+                }
+                else if (hit.transform.name.StartsWith("Luxury house") && i >= 4 && i <= 7)
+                {
+                    lh_count++;
+                    _trashCan.Add(hit.transform.gameObject);
+                    if (i == 7 && lh_count == 4)
+                    {
+                        Debug.Log("say what");
+                        result = Mansion;
+                    }
+                    else continue;
+                }
+                else continue;
+
+                if (combine)
+                {
+                    Instantiate(result, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
+
+                    _trashCan.Add(gameObject);
+                    foreach (var obj in _trashCan) Destroy(obj);
+                }
+                else
+                {
+                    if (gameObject == _combiner.LastPlacedTile ||
+                        _trashCan.Contains(_combiner.LastPlacedTile))
+                    {
+                        _combiner.Alternatives.Add(gameObject);
+                        _combiner.Names.Add(result.name);
+                    }
+                }
+                break;
+            }
         }
-        return null;
     }
 }

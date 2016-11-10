@@ -43,7 +43,7 @@ public class SteamVR_ControllerManager : MonoBehaviour
 		for (int i = 0; i < objects.Length; i++)
 		{
 			var obj = objects[i];
-			if (obj != null)
+			if (obj != null) { }
 				obj.SetActive(false);
 		}
 

@@ -15,10 +15,12 @@ public class AreaCheck : MonoBehaviour
     private const float OffsetY = -4;
     private Wand _controller;
     private HMDComponents _HMD;
+    private Transform _wrap;
 
     void Awake ()
     {
         _controller = RightHand.GetComponent<Wand>();
+        _wrap = transform.FindChild("Wrap");
         DistanceToPreviewPlacement = Vector3.zero;
     }
 
@@ -42,7 +44,7 @@ public class AreaCheck : MonoBehaviour
         temp.z = currentGameObject.transform.position.z;
         transform.position = temp;
 
-        transform.FindChild("Wrap").rotation = Quaternion.identity;
+        _wrap.rotation = Quaternion.identity;
 
         DeletePreviews();
 		foreach (Transform child in currentGameObject.transform)
@@ -50,14 +52,14 @@ public class AreaCheck : MonoBehaviour
 			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, GameSettings.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
             // Check if newPreview is null. If so, skip over this part.
 		    if (newPreview == null) continue;
-			newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform.FindChild("Wrap");
+		    newPreview.transform.parent = _wrap;
 			newPreview.transform.localScale = Vector3.one;
 		}
 	}
 
 	public void DeletePreviews()
     {
-        foreach (Transform child in transform.FindChild("Wrap"))
+        foreach (Transform child in _wrap)
         {
             if (child.gameObject.name.StartsWith("Preview"))
                 Destroy(child.gameObject);
@@ -82,15 +84,15 @@ public class AreaCheck : MonoBehaviour
 
     public bool IsAreaFree()
     {
-        foreach (Transform child in transform)
+        foreach (Transform child in _wrap)
         {
             if (child.gameObject.name.StartsWith("Preview"))
             {
                 RaycastHit hit;
-                if (Physics.Raycast(child.position + new Vector3(0, -20, 0), Vector3.up, out hit, Mathf.Infinity, Tiles) &&
-                hit.collider.tag == "Tile" &&
-                hit.transform.GetComponent<DragAndPlace>().Placed)
-                return false;
+                if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, Mathf.Infinity, Tiles) &&
+                    hit.collider.tag == "Tile" &&
+                    hit.transform.GetComponent<DragAndPlace>().Placed)
+                    return false;
             }
         }
         return true;

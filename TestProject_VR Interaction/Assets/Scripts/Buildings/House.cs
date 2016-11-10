@@ -1,23 +1,76 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System;
+using System.Collections.Generic;
 
-public class House : ComboParent {
-    protected override void Awake()
-    {
-        base.Awake();
-        _tiles = transform.GetComponent<DragAndPlace>().Tiles;
 
-        //TODO These are the values from LuxuryHouse and has to be set correctly for the default house
-        xPos = new[] { 1, 1, -1, -1 };
-        zPos = new[] { 0, 1, 0, 1 };
+public class House : MonoBehaviour {
 
-        xAdj = new[] { 0, 0, 0, 0 }; // <- (atm this is useless, but probably need for other kinds of combos)
-        zAdj = new[] { 0, 1, 0, 1 };
-        rotAdj = new[] { 0, 90, -90, -180 };
+    public GameObject Duplex, Townhouse;
+
+    private float _xSize;
+	private float _zSize;
+
+	private LayerMask _tiles;
+    private Combiner _combiner;
+    private List<GameObject> _trashCan = new List<GameObject>();
+
+    private int[] xPos, zPos, xAdj, zAdj, rotAdj;
+
+	void Awake ()
+	{
+	    _xSize = _zSize = GameSettings.SNAP_VALUE;
+		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
+	    _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+
+         xPos = new [] { 1, 0, -1, 0 };
+         zPos = new [] { 0, 1, 0, -1 };
+
+         xAdj = new [] { 0, 0, 0, 0 };
+         zAdj = new [] { 0, 0, 0, 0 };
+         rotAdj = new[] { 90, 0, -90, 180 };
     }
-    protected override GameObject MakeCombo(string buildingName)
+
+    void CheckForCombos(bool combine)
     {
-        return null;
+        _trashCan.Clear();
+
+        for (var i = 0; i < xPos.Length; i++)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 10, _tiles))
+            {
+                if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
+
+                GameObject result;
+                if (hit.transform.name.StartsWith("House"))
+                {
+                    _trashCan.Add(hit.transform.gameObject);
+                    result = Duplex;
+                }
+                else if (hit.transform.name.StartsWith("Apartments"))
+                {
+                    _trashCan.Add(hit.transform.gameObject);
+                    result = Townhouse;
+                }
+                else continue;
+
+                if (combine)
+                {
+                    Instantiate(result, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
+
+                    _trashCan.Add(gameObject);
+                    foreach (var obj in _trashCan) Destroy(obj);
+                }
+                else
+                {
+                    if (gameObject == _combiner.LastPlacedTile ||
+                        _trashCan.Contains(_combiner.LastPlacedTile))
+                    {
+                        _combiner.Alternatives.Add(gameObject);
+                        _combiner.Names.Add(result.name);
+                    }
+                }
+                break;
+            }
+        }
     }
 }

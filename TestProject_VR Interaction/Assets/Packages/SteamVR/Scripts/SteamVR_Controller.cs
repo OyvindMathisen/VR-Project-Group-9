@@ -10,6 +10,7 @@
 //
 //=============================================================================
 
+using System;
 using UnityEngine;
 using Valve.VR;
 
@@ -139,6 +140,8 @@ public class SteamVR_Controller
 
 	private static Device[] devices;
 
+    private static int i = 0;
+
 	public static Device Input(int deviceIndex)
 	{
 		if (devices == null)
@@ -147,8 +150,9 @@ public class SteamVR_Controller
 			for (uint i = 0; i < devices.Length; i++)
 				devices[i] = new Device(i);
 		}
-
-		return devices[deviceIndex];
+			
+        return devices[deviceIndex];
+        return null;
 	}
 
 	public static void Update()

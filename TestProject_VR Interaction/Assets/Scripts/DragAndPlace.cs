@@ -1,31 +1,39 @@
 ﻿using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DragAndPlace : MonoBehaviour
 {
     public bool Placed; // if the tile is still "dragged" around (the mouse button is not released yet)
     public LayerMask Tiles;
     public float BuildingFallSpeed = 1.5f;
+	public bool ReachedHeight;
 
     private GameObject _previewPlacement;
     private GameObject _rightController;
     private Wand _controller;
-    private bool _hasRotated, _oncePlaced, _reachedHeight;
+    private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong;
     private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
     private AreaCheck _areaCheck;
     private Quaternion _lastSafeRot;
+    private Combiner _combiner;
 
-    protected virtual void Awake()
+    void Awake()
 	{
         _rightController = GameObject.FindWithTag("Rhand");
+        _controller = _rightController.GetComponent<Wand>();
+
         _previewPlacement = GameObject.FindWithTag("PreviewPlacement");
-		_controller = _rightController.GetComponent<Wand>();
         _areaCheck = _previewPlacement.GetComponent<AreaCheck>();
 	    _lastSafePos = Vector3.zero;
 
+        _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+
+        transform.parent = GameObject.Find("Tiles").transform;
+
         // if placed is true to begin with, it's probably a combined building
         if (!Placed) return;
-        _reachedHeight = true;
+		ReachedHeight = true;
         _oncePlaced = true;
 	}
 
@@ -37,32 +45,51 @@ public class DragAndPlace : MonoBehaviour
         _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
     }
 
-	protected virtual void Update()
+	void Update()
 	{
         // If the building has yet to be placed.
 		if (!Placed)
 		{
             _areaCheck.HeldObject = transform;
 
+		    if (!_onceNotPlaced)
+		    {
+                // TODO: improve canceling
+                _combiner.Cancel();
+
+                // to prevent raycasting self when checking for free area
+                foreach (var c in GetComponentsInChildren<Collider>())
+                {
+                    c.enabled = false;
+                }
+
+                _oncePlaced = false;
+				ReachedHeight = false;
+
+                _onceNotPlaced = true;
+		    }
+
             // Collision check to prevent overlapping buildings
             if (_controller.TriggerButtonUp)
             {
+                Placed = true;
+                _controller.IsHolding = false;
+
                 if (!_areaCheck.IsAreaFree())
                 {
                     if (_lastSafePos != Vector3.zero)
                     {
-                        transform.position = _lastSafePos;
                         transform.rotation = _lastSafeRot;
+                        transform.position = _lastSafePos;
                     }
                     else
                     {
                         Destroy(gameObject);
                     }
+                    _placedWrong = true;
                     _previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
+                    return;
                 }
-
-                Placed = true;
-                _controller.IsHolding = false;
             }
 
 			// Rotate handler, right direction
@@ -128,19 +155,40 @@ public class DragAndPlace : MonoBehaviour
             newPosition.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
             newPosition.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
             transform.position = newPosition;
-
-            _oncePlaced = false;
-            _reachedHeight = false;
         }
         // If the building has been placed.
 		else
 		{
+            
             if (!_oncePlaced)
             {
-                SetBuildingPosition();
-            }
+                // Delete old previews lingering on the map
+                _areaCheck.DeletePreviews();
 
-            // while the building is not at specified height
+                foreach (var c in GetComponentsInChildren<Collider>())
+                {
+                    c.enabled = true;
+                }
+                if (_placedWrong)
+                {
+					ReachedHeight = true;
+                    _placedWrong = false;
+                }
+                else
+                {
+                    // set building position
+                    var snappedPosition = transform.position;
+                    snappedPosition.x = Mathf.Round(snappedPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+                    snappedPosition.z = Mathf.Round(snappedPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+                    snappedPosition.y = transform.position.y;
+                    transform.position = snappedPosition;
+                }
+
+                _onceNotPlaced = false;
+                _oncePlaced = true;
+            }
+		    
+		    // while the building is not at specified height
             if (!transform.position.y.Equals(GameSettings.BUILD_HEIGHT))
             {
 				transform.Translate(0, -BuildingFallSpeed, 0);
@@ -154,8 +202,7 @@ public class DragAndPlace : MonoBehaviour
                 }
             }
             // Preformed when a building lands on the intended height.
-		    if (!(transform.position.y > GameSettings.BUILD_HEIGHT - 4f) || !(transform.position.y < GameSettings.BUILD_HEIGHT + 4f) || _reachedHeight) return;
-
+			if (!(transform.position.y > GameSettings.BUILD_HEIGHT - 4f) || !(transform.position.y < GameSettings.BUILD_HEIGHT + 4f) || ReachedHeight) return;
 		    if (_areaCheck.PreviewCount > 3)
 		    {
 		        var sfx = _previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();
@@ -177,41 +224,86 @@ public class DragAndPlace : MonoBehaviour
 		        foreach (var ps in fx.GetComponentsInChildren<ParticleSystem>())
 		            ps.Play();
 		    }
-            // Runs the Child script ComboParent.OnPlaced();
-            OnPlaced();
+
+		    GameSettings.NewestLandedPosition = gameObject.transform.position;
+		    _combiner.LastPlacedTile = gameObject;
+            CheckConnectedTilesForCombo();
+            //transform.parent.BroadcastMessage("CheckForCombos", false);
+		    ReachedHeight = true;
 		}
     }
 
-    // Placeholder method if child ComboParent has not been made.
-    protected virtual void OnPlaced()
+
+    List<GameObject> connectedTiles = new List<GameObject>();
+    List<GameObject> markedColliders = new List<GameObject>();
+    void CheckConnectedTilesForCombo()
     {
-		_reachedHeight = true;
+        connectedTiles.Clear();
+        markedColliders.Clear();
+
+		// If no child is found, it's an older building. No need to raycast.
+		if (transform.childCount == 0)
+			return;
+		
+		RaycastForConnectedTiles(transform.FindChild("Collider1").gameObject);
+
+        List<GameObject> connectedTilesParents = new List<GameObject>();
+
+        foreach (var child in connectedTiles)
+        {
+            if (!connectedTilesParents.Contains(child.transform.parent.gameObject))
+                connectedTilesParents.Add(child.transform.parent.gameObject);
+        }
+
+        foreach (var tile in connectedTilesParents)
+        {
+            tile.transform.SendMessage("CheckForCombos", false, SendMessageOptions.DontRequireReceiver);
+            Debug.Log("message sent pos:" + tile.transform.position);
+        }
     }
 
-    private void SetBuildingPosition()
+    
+
+    void RaycastForConnectedTiles(GameObject src)
     {
-        // Delete old previews lingering on the map
-        _areaCheck.DeletePreviews();
+        var gameObjects = new List<GameObject>();
+        float xSize;
+        var zSize = xSize = GameSettings.SNAP_VALUE;
 
-        var snappedPosition = transform.position; // previously areaCheck's position
-        snappedPosition.x = Mathf.Round(snappedPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
-        snappedPosition.z = Mathf.Round(snappedPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
-        snappedPosition.y = transform.position.y;
-        transform.position = snappedPosition;
+        int[] xPos = { 1, 0, -1, 0 };
+        int[] zPos = { 0, 1, 0, -1 };
 
-        _oncePlaced = true;
+        for (var i = 0; i < 4; i++)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(src.transform.position + src.transform.right*xSize*xPos[i] + new Vector3(0, 10, 0) + src.transform.forward*zSize*zPos[i], Vector3.down, out hit, 10, Tiles))
+            {
+                if (hit.collider.tag != "Tile" && !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
+                if (markedColliders.Contains(hit.collider.gameObject)) continue;
+
+                Debug.Log(hit.collider.gameObject.name);
+
+                gameObjects.Add(hit.collider.gameObject);
+                markedColliders.Add(hit.collider.gameObject);
+            }
+        }
+
+        foreach (var obj in gameObjects)
+            RaycastForConnectedTiles(obj);
+
+        connectedTiles.AddRange(gameObjects);
     }
 
-	void OnTriggerStay(Collider other)
+    void OnTriggerStay(Collider other)
 	{
-	    if (_controller == null || other.tag != "Rhand" || !_controller.TriggerButtonDown || _controller.IsHolding) return;
+	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown || _controller.IsHolding) return;
         _areaCheck.NewPreviewArea(gameObject);
         _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
         _distToHand = transform.position - _controller.transform.position;
 
         if (Placed)
 	    {
-	        _lastSafePos = transform.position;
+            _lastSafePos = transform.position;
 	        _lastSafeRot = transform.rotation;
 	    }
 

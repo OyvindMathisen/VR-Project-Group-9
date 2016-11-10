@@ -18,4 +18,8 @@ public class GameSettings : MonoBehaviour {
     /// 1 / SNAP_VALUE;
     /// </summary>
     public static float SNAP_INVERSE = 0.125f;
+    /// <summary>
+    /// The center of the newly landed and placed tile.
+    /// </summary>
+    public static Vector3 NewestLandedPosition;
 }

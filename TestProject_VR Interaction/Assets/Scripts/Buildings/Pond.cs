@@ -14,7 +14,7 @@ public class Pond : MonoBehaviour {
 
     private int[] xPos, zPos, xAdj, zAdj, rotAdj;
 
-    private int p_count, f_count;
+    private int p_count, f_count, f2_count;
 
 	void Awake ()
 	{
@@ -22,12 +22,12 @@ public class Pond : MonoBehaviour {
 		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
 	    _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
 
-        xPos = new[] { 1, 1, 0, 1, 1, 0, 1, 0, -1,  0 };
-        zPos = new[] { 0, 1, 1, 0, 1, 1, 0, 1,  0, -1 };
+        xPos = new[] { 1, 1, 0, 1, 1, 0, 1, 0, -1,  0, 1, 1, 0 };
+        zPos = new[] { 0, 1, 1, 0, 1, 1, 0, 1,  0, -1, 0, -1, -1 };
 
-        xAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        zAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-      rotAdj = new[] { 0, 0, 0, 0, 0, 0, 90, 0, -90, 180 };
+        xAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        zAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+      rotAdj = new[] { 0, 0, 0, 0, 0, 0, 90, 0, -90, 180, 0, 0, 0 };
     }
 
     void CheckForCombos(bool combine)
@@ -35,6 +35,7 @@ public class Pond : MonoBehaviour {
         _trashCan.Clear();
         p_count = 0;
         f_count = 0;
+        f2_count = 0;
 
         for (var i = 0; i < xPos.Length; i++)
         {
@@ -65,10 +66,21 @@ public class Pond : MonoBehaviour {
                     }
                     else continue;
                 }
-                else if (hit.transform.name.StartsWith("Pond") && i > 5)
+                else if (hit.transform.name.StartsWith("Pond") && i > 5 && i < 9)
                 {
                     _trashCan.Add(hit.transform.gameObject);
                     result = SwimmingPool;
+                }
+                else if (((i == 9 || i == 11) && hit.transform.name.StartsWith("Park"))
+                    || (i == 10 && hit.transform.name.StartsWith("Pond")))
+                {
+                    _trashCan.Add(hit.transform.gameObject);
+                    f2_count++;
+                    if (f2_count == 3)
+                    {
+                        result = Fountain;
+                    }
+                    else continue;
                 }
                 else continue;
 

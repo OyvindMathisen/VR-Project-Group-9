@@ -56,7 +56,6 @@ public class LuxuryHouse : MonoBehaviour {
                     _trashCan.Add(hit.transform.gameObject);
                     if (i == 7 && lh_count == 4)
                     {
-                        Debug.Log("say what");
                         result = Mansion;
                     }
                     else continue;

@@ -10,7 +10,6 @@ public class DragAndPlace : MonoBehaviour
 	public bool ReachedHeight;
 
     private GameObject _previewPlacement;
-    private GameObject _rightController;
     private Wand _controller;
     private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong;
     private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
@@ -20,9 +19,6 @@ public class DragAndPlace : MonoBehaviour
 
     void Awake()
 	{
-        _rightController = GameObject.FindWithTag("Rhand");
-        _controller = _rightController.GetComponent<Wand>();
-
         _previewPlacement = GameObject.FindWithTag("PreviewPlacement");
         _areaCheck = _previewPlacement.GetComponent<AreaCheck>();
 	    _lastSafePos = Vector3.zero;
@@ -39,6 +35,8 @@ public class DragAndPlace : MonoBehaviour
 
 	void Start()
 	{
+		_controller = HMDComponents.getRightWand();
+
 		_distToHand = transform.position - _controller.transform.position;
 		if (!Placed)
 		_areaCheck.NewPreviewArea(gameObject);

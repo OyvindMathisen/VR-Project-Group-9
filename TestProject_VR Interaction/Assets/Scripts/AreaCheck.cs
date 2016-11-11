@@ -14,15 +14,19 @@ public class AreaCheck : MonoBehaviour
 	private Vector3 _curPosition;
     private const float OffsetY = -4;
     private Wand _controller;
-    private HMDComponents _HMD;
     private Transform _wrap;
 
     void Awake ()
     {
-        _controller = RightHand.GetComponent<Wand>();
+        
         _wrap = transform.FindChild("Wrap");
         DistanceToPreviewPlacement = Vector3.zero;
     }
+
+	void Start ()
+	{
+		_controller = HMDComponents.getRightWand();
+	}
 
 	void Update ()
 	{
@@ -49,6 +53,7 @@ public class AreaCheck : MonoBehaviour
         DeletePreviews();
 		foreach (Transform child in currentGameObject.transform)
 		{
+			if (child.tag != "Tile") continue; // Only do this for objects tagged as locations for the preview area.
 			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, GameSettings.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
             // Check if newPreview is null. If so, skip over this part.
 		    if (newPreview == null) continue;
@@ -66,21 +71,6 @@ public class AreaCheck : MonoBehaviour
         }
         PreviewCount = 0;
     }
-
-    /*/
-    public bool IsAreaFree()
-    {
-        foreach (Transform child in transform.Cast<Transform>().Where(child => child.gameObject.name.StartsWith("Preview")))
-        {
-            RaycastHit hit;
-            if (!Physics.Raycast(child.position + new Vector3(0, -20, 0), Vector3.up, out hit, Mathf.Infinity, Tiles)) continue;
-            if (hit.collider.tag != "Tile") continue;
-            if (hit.transform.GetComponent<DragAndPlace>().Placed)
-                return false;
-        }
-        return true;
-    }
-    //*/
 
     public bool IsAreaFree()
     {

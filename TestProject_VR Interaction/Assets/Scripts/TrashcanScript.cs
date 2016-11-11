@@ -20,17 +20,5 @@ public class TrashcanScript : MonoBehaviour
         if (!script.Placed || script.ReachedHeight) return; // Only delete objects currently falling.
 		Destroy(parent);
     }
-
-	/*
-	// This method requires not having the colliders be on the child objects.
-	// There is currently no need to have the colliders be there either. Simply
-	// leave the empty gameobjects there to get their position.
-	void OnTriggerEnter(Collider col)
-	{
-		if (col.tag != "Tile") return; // Prevents accidentally deleting anything but buildings.
-		var script = parent.GetComponent<DragAndPlace>();
-		if (!script.Placed || script.ReachedHeight) return; // Only delete objects currently falling.
-		Destroy(col.GameObject);
-	}
-	*/
+	
 }

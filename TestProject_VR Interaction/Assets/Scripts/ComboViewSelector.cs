@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class ComboViewSelector : MoveObject {
 
-	// temporary value
-	// replace with the method to get all comboes
-	private int _maxCombo = 10;
+	public List<GameObject> Comboes = new List<GameObject>();
 
 	private int _comboNumber = 0;
 	private bool _hasChanged;
@@ -67,16 +65,23 @@ public class ComboViewSelector : MoveObject {
 	{
 		if (_comboNumber < 0)
 		{
-			_comboNumber = _maxCombo;
+			_comboNumber = Comboes.Count-1;
 		}
 
-		if (_comboNumber > _maxCombo)
+		if (_comboNumber > Comboes.Count-1)
 		{
 			_comboNumber = 0;
 		}
 
 		// TODO: Make the function display the correct combo.
 		Debug.Log("Combo number: " + _comboNumber + " is now displayed");
+
+		foreach (GameObject screens in Comboes)
+		{
+			screens.SetActive (false);
+		}
+
+		Comboes [_comboNumber].SetActive (true);
 
 		_hasChanged = true;
 	}

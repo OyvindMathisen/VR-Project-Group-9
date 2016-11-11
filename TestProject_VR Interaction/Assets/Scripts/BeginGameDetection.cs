@@ -39,14 +39,14 @@ public class BeginGameDetection : MonoBehaviour
 	// Adds all blocks entering the start-game field into a list.
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(other.gameObject)) return;
-		_objectsInGameStartArea.Add(other.gameObject);
+		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(other.transform.parent.gameObject)) return;
+		_objectsInGameStartArea.Add(other.transform.parent.gameObject);
 	}
 
 	// Removes them, in case you drag a block away from the start-game field.
 	void OnTriggerExit(Collider other)
 	{
-		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(other.gameObject)) return;
-		_objectsInGameStartArea.Remove(other.gameObject);
+		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(other.transform.parent.gameObject)) return;
+		_objectsInGameStartArea.Remove(other.transform.parent.gameObject);
 	}
 }

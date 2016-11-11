@@ -22,7 +22,7 @@ public class Wand : MonoBehaviour
 	public bool TouchpadRight = false;
 	public bool TouchpadLeft = false;
 
-	public float TouchpadDetectLimit = 0.5f;
+	public float TouchpadDetectLimit = 0.0f;
 
 	public bool IsHolding = false;
 

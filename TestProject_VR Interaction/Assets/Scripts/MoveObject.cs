@@ -3,6 +3,8 @@ using System.Collections;
 
 public class MoveObject : MonoBehaviour
 {
+	public Transform ParentOnRelease;
+
 	protected Wand ControllerScriptRight;
 	protected Wand ControllerScriptLeft;
 
@@ -29,7 +31,7 @@ public class MoveObject : MonoBehaviour
 		// Then we unbind it from our controllers.
 		if (!RightHolding && !LeftHolding) 
 		{
-			transform.parent = null;
+			transform.parent = ParentOnRelease;
 		}
     }
 

@@ -77,8 +77,10 @@ public class Park : MonoBehaviour {
                         _trashCan.Contains(_combiner.LastPlacedTile))
                     {
                         // to prevent two possible alternatives when it's actually one
-                        if (!(result == Sculpture && _combiner.LastPlacedTile != gameObject)) continue;
-
+                        if (result == Sculpture && _combiner.LastPlacedTile != gameObject)
+                        {
+                            continue;
+                        }
                         _combiner.Alternatives.Add(gameObject);
                         _combiner.Names.Add(result.name);
                     }

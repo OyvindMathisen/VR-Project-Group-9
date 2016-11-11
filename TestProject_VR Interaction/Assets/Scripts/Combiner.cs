@@ -15,7 +15,7 @@ public class Combiner : MonoBehaviour
     private Transform _indicator, _timer, _wall;
     private TextMesh _name, _number, _name2, _number2;
     public float time, next;
-    private const float nextDelay = 5.0f; // 3.0f
+    private const float nextDelay = 2.5f;
     private float _timerWidth;
     private const float CharacterWidth = 0.6f;
 

@@ -1,0 +1,339 @@
+fileFormatVersion: 2
+guid: abadff806b6aef341a428e2e93cb4afb
+timeCreated: 1478828522
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: placeholdertexts_0
+    21300002: placeholdertexts_1
+    21300004: placeholdertexts_2
+    21300006: placeholdertexts_3
+    21300008: placeholdertexts_4
+    21300010: placeholdertexts_5
+    21300012: placeholdertexts_6
+    21300014: placeholdertexts_7
+    21300016: placeholdertexts_8
+    21300018: placeholdertexts_9
+    21300020: placeholdertexts_10
+    21300022: placeholdertexts_11
+    21300024: placeholdertexts_12
+    21300026: placeholdertexts_13
+    21300028: placeholdertexts_14
+    21300030: placeholdertexts_15
+    21300032: placeholdertexts_16
+    21300034: placeholdertexts_17
+    21300036: placeholdertexts_18
+    21300038: placeholdertexts_19
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 1
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 0
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 0
+  spriteTessellationDetail: -1
+  textureType: 0
+  buildTargetSettings: []
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: placeholdertexts_0
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 966
+        width: 163
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_1
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 905
+        width: 218
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_2
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 902
+        width: 160
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_3
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 841
+        width: 186
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_4
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 841
+        width: 304
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_5
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 779
+        width: 246
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_6
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 777
+        width: 235
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_7
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 718
+        width: 401
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_8
+      rect:
+        serializedVersion: 2
+        x: 518
+        y: 715
+        width: 227
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_9
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 654
+        width: 492
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_10
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 654
+        width: 227
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_11
+      rect:
+        serializedVersion: 2
+        x: 11
+        y: 593
+        width: 163
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_12
+      rect:
+        serializedVersion: 2
+        x: 514
+        y: 590
+        width: 323
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_13
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 532
+        width: 275
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_14
+      rect:
+        serializedVersion: 2
+        x: 517
+        y: 529
+        width: 297
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_15
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 468
+        width: 132
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_16
+      rect:
+        serializedVersion: 2
+        x: 515
+        y: 468
+        width: 190
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_17
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 406
+        width: 159
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_18
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 345
+        width: 295
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: placeholdertexts_19
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 281
+        width: 323
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

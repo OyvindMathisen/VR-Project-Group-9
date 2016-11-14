@@ -201,20 +201,12 @@ public class DragAndPlace : MonoBehaviour
             }
             // Preformed when a building lands on the intended height.
 			if (!(transform.position.y > GameSettings.BUILD_HEIGHT - 4f) || !(transform.position.y < GameSettings.BUILD_HEIGHT + 4f) || ReachedHeight) return;
-		    if (_areaCheck.PreviewCount > 3)
-		    {
-		        var sfx = _previewPlacement.transform.FindChild("sfxPlace2").GetComponent<AudioSource>();
-		        sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
-		        sfx.Play();
-		    }
-		    else
-		    {
-		        var sfx = _previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
-		        sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
-		        sfx.Play();
-		    }
-		    // particle effect for every tile in placed building
-		    foreach (Transform child in transform)
+            var sfx = _previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
+            sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+            sfx.Play();
+
+            // particle effect for every tile in placed building
+            foreach (Transform child in transform)
 		    {
 		        var fx = Instantiate(Resources.Load("FogExplosion", typeof(GameObject)), new Vector3(child.transform.position.x, GameSettings.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
                 // Check next object if FX is null.
@@ -255,8 +247,7 @@ public class DragAndPlace : MonoBehaviour
 
         foreach (var tile in connectedTilesParents)
         {
-            tile.transform.SendMessage("CheckForCombos", false, SendMessageOptions.DontRequireReceiver);
-            Debug.Log("message sent pos:" + tile.transform.position);
+            tile.transform.SendMessage("CheckForCombos", -2, SendMessageOptions.DontRequireReceiver);
         }
     }
 
@@ -274,12 +265,10 @@ public class DragAndPlace : MonoBehaviour
         for (var i = 0; i < 4; i++)
         {
             RaycastHit hit;
-            if (Physics.Raycast(src.transform.position + src.transform.right*xSize*xPos[i] + new Vector3(0, 10, 0) + src.transform.forward*zSize*zPos[i], Vector3.down, out hit, 10, Tiles))
+            if (Physics.Raycast(src.transform.position + src.transform.right*xSize*xPos[i] + new Vector3(0, 100, 0) + src.transform.forward*zSize*zPos[i], Vector3.down, out hit, 100, Tiles))
             {
                 if (hit.collider.tag != "Tile" && !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
                 if (markedColliders.Contains(hit.collider.gameObject)) continue;
-
-                Debug.Log(hit.collider.gameObject.name);
 
                 gameObjects.Add(hit.collider.gameObject);
                 markedColliders.Add(hit.collider.gameObject);

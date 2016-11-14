@@ -11,6 +11,8 @@ public class Park : MonoBehaviour {
 	private LayerMask _tiles;
     private Combiner _combiner;
     private List<GameObject> _trashCan = new List<GameObject>();
+    private List<GameObject>[] _garbageBin;
+    private GameObject result;
 
     private int[] xPos, zPos, xAdj, zAdj, rotAdj;
 
@@ -28,65 +30,60 @@ public class Park : MonoBehaviour {
          rotAdj = new[] { 90, 0, -90, 180 };
     }
 
-    void CheckForCombos(bool combine)
+    void CheckForCombos(int I)
     {
-        _trashCan.Clear();
-
-        for (var i = 0; i < xPos.Length; i++)
+        if (I < 0)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 10, _tiles))
+            _trashCan.Clear();
+            _garbageBin = new List<GameObject>[xPos.Length];
+            for (var j = 0; j < xPos.Length; j++) _garbageBin[j] = new List<GameObject>();
+
+            for (var i = 0; i < xPos.Length; i++)
             {
-                if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 100, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 100, _tiles))
+                {
+                    if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
 
-                GameObject result;
-                if (hit.transform.name.StartsWith("Luxury house") || hit.transform.name.StartsWith("Mansion"))
-                {
-                    _trashCan.Add(hit.transform.gameObject);
-                    result = Estate;
-                }
-                else if (hit.transform.name.StartsWith("Park"))
-                {
-                    _trashCan.Add(hit.transform.gameObject);
-                    result = Sculpture;
-                }
-                else if (hit.transform.name.StartsWith("Plaza"))
-                {
-                    _trashCan.Add(hit.transform.gameObject);
-                    result = Playground;
-                }
-                else continue;
-
-                if (combine)
-                {
-                    Instantiate(result, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
-
-                    if (result == Estate)
+                    if (hit.transform.name.StartsWith("Luxury house") || hit.transform.name.StartsWith("Mansion"))
                     {
-                        Destroy(gameObject);
+                        _trashCan.Add(hit.transform.gameObject);
+                        result = Estate;
                     }
-                    else
+                    else if (hit.transform.name.StartsWith("Park"))
                     {
-                        _trashCan.Add(gameObject);
-                        foreach (var obj in _trashCan) Destroy(obj);
-                    }                   
-                }
-                else
-                {
-                    if (gameObject == _combiner.LastPlacedTile ||
-                        _trashCan.Contains(_combiner.LastPlacedTile))
-                    {
-                        // to prevent two possible alternatives when it's actually one
-                        if (result == Sculpture && _combiner.LastPlacedTile != gameObject)
-                        {
-                            continue;
-                        }
-                        _combiner.Alternatives.Add(gameObject);
-                        _combiner.Names.Add(result.name);
+                        _trashCan.Add(hit.transform.gameObject);
+                        result = Sculpture;
                     }
+                    else if (hit.transform.name.StartsWith("Plaza"))
+                    {
+                        _trashCan.Add(hit.transform.gameObject);
+                        result = Playground;
+                    }
+                    else continue;
+
+                    if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile)) continue;
+                    // to prevent two possible alternatives when it's actually one
+                    if (result == Sculpture && _combiner.LastPlacedTile != gameObject) continue;
+                    _combiner.Alternatives.Add(gameObject);
+                    _combiner.Names.Add(result.name);
+                    _combiner.I.Add(i);
+
+                    _garbageBin[i].AddRange(_trashCan);
+                    _trashCan.Clear();
                 }
-                break;
             }
+        }
+        else
+        {
+            Instantiate(result, transform.position + transform.right * _xSize * xAdj[I] + transform.forward * _zSize * zAdj[I], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[I], 0));
+
+            if (result != Estate)
+            {
+                _garbageBin[I].Add(gameObject);
+                foreach (var obj in _garbageBin[I]) Destroy(obj);
+            }
+            else Destroy(gameObject);
         }
     }
 }

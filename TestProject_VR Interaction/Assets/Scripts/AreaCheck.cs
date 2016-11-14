@@ -8,7 +8,7 @@ public class AreaCheck : MonoBehaviour
     public GameObject RightHand;
     public LayerMask Tiles;
     public GameObject Preview;
-    public int PreviewCount;
+    public int PreviewCount; // not used atm
     public Vector3 DistanceToPreviewPlacement;
     public Transform HeldObject;
 	private Vector3 _curPosition;
@@ -18,7 +18,6 @@ public class AreaCheck : MonoBehaviour
 
     void Awake ()
     {
-        
         _wrap = transform.FindChild("Wrap");
         DistanceToPreviewPlacement = Vector3.zero;
     }
@@ -35,8 +34,8 @@ public class AreaCheck : MonoBehaviour
         else
             _curPosition = RightHand.transform.position;
 
-	    float currentX = Mathf.Round(_curPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
-		float currentZ = Mathf.Round(_curPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+	    var currentX = Mathf.Round(_curPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+		var currentZ = Mathf.Round(_curPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
 
 		transform.position = new Vector3(currentX, GameSettings.BUILD_HEIGHT-OffsetY, currentZ);
 	}
@@ -54,11 +53,13 @@ public class AreaCheck : MonoBehaviour
 		foreach (Transform child in currentGameObject.transform)
 		{
 			if (child.tag != "Tile") continue; // Only do this for objects tagged as locations for the preview area.
-			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, GameSettings.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
+			var newPreview = Instantiate(Preview);
             // Check if newPreview is null. If so, skip over this part.
 		    if (newPreview == null) continue;
 		    newPreview.transform.parent = _wrap;
 			newPreview.transform.localScale = Vector3.one;
+		    newPreview.transform.position = new Vector3(child.transform.position.x, GameSettings.BUILD_HEIGHT+GameSettings.PREVIEW_HEIGHT_ADJUST, child.transform.position.z);
+		    PreviewCount++;
 		}
 	}
 

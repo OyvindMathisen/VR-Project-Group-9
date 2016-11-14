@@ -49,7 +49,8 @@ public class Wand : MonoBehaviour
 		// Check to make sure the controller actually connected.
 		if (Controller == null)
 		{
-			Debug.Log("Controller not initialized");
+            // TODO: UNDO
+			//Debug.Log("Controller not initialized");
 			return;
 		}
 

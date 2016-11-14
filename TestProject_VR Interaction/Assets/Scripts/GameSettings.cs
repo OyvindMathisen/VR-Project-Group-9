@@ -22,4 +22,13 @@ public class GameSettings : MonoBehaviour {
     /// The center of the newly landed and placed tile.
     /// </summary>
     public static Vector3 NewestLandedPosition;
+    /// <summary>
+    /// Height adjustment for the "previewplacement" and "relevanttile" squares.
+    /// </summary>
+    public static float PREVIEW_HEIGHT_ADJUST = -4.0f;
+    /// <summary>
+    /// The time the user gets to decide if the current combination alternative is the one the user wants.
+    /// </summary>
+    public static float COMBO_DECISION_TIME = 5.0f; //normally 2.5f - dev mode atm
+
 }

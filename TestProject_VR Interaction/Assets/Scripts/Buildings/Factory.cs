@@ -12,6 +12,8 @@ public class Factory : MonoBehaviour {
 	private LayerMask _tiles;
     private Combiner _combiner;
     private List<GameObject> _trashCan = new List<GameObject>();
+    private List<GameObject>[] _garbageBin;
+    private GameObject result;
 
     private int[] xPos, zPos, xAdj, zAdj, rotAdj;
 
@@ -29,43 +31,44 @@ public class Factory : MonoBehaviour {
          rotAdj = new[] { 90, 0, -90, 180 };
     }
 
-    void CheckForCombos(bool combine)
+    void CheckForCombos(int I)
     {
-        _trashCan.Clear();
-
-        for (var i = 0; i < xPos.Length; i++)
+        if (I < 0)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 10, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 10, _tiles))
+            _trashCan.Clear();
+            _garbageBin = new List<GameObject>[xPos.Length];
+            for (var j = 0; j < xPos.Length; j++) _garbageBin[j] = new List<GameObject>();
+
+            for (var i = 0; i < xPos.Length; i++)
             {
-                if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
-
-                GameObject result;
-                if (hit.transform.name.StartsWith("Silos"))
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 100, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 100, _tiles))
                 {
-                    _trashCan.Add(hit.transform.gameObject);
-                    result = Brewery;
-                }
-                else continue;
+                    if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
 
-                if (combine)
-                {
-                    Instantiate(result, transform.position + transform.right * _xSize * xAdj[i] + transform.forward * _zSize * zAdj[i], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[i], 0));
+                    if (hit.transform.name.StartsWith("Silos"))
+                    {
+                        _trashCan.Add(hit.transform.gameObject);
+                        result = Brewery;
+                    }
+                    else continue;
+
+                    if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile)) continue;
+                    _combiner.Alternatives.Add(gameObject);
+                    _combiner.Names.Add(result.name);
+                    _combiner.I.Add(i);
 
                     _trashCan.Add(gameObject);
-                    foreach (var obj in _trashCan) Destroy(obj);
+                    _combiner.RelevantBuildings.Add(new List<GameObject>(_trashCan));
+                    _garbageBin[i].AddRange(_trashCan);
+                    _trashCan.Clear();
                 }
-                else
-                {
-                    if (gameObject == _combiner.LastPlacedTile ||
-                        _trashCan.Contains(_combiner.LastPlacedTile))
-                    {
-                        _combiner.Alternatives.Add(gameObject);
-                        _combiner.Names.Add(result.name);
-                    }
-                }
-                break;
             }
+        }
+        else
+        {
+            Instantiate(result, transform.position + transform.right * _xSize * xAdj[I] + transform.forward * _zSize * zAdj[I], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[I], 0));
+            foreach (var obj in _garbageBin[I]) Destroy(obj);
         }
     }
 }

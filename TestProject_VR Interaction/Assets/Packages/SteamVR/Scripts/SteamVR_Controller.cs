@@ -152,6 +152,8 @@ public class SteamVR_Controller
 		}
 			
         return devices[deviceIndex];
+        // TODO: UNDO
+	    //return null;
 	}
 
 	public static void Update()

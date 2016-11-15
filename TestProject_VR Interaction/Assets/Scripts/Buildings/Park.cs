@@ -69,6 +69,8 @@ public class Park : MonoBehaviour {
                     _combiner.Names.Add(result.name);
                     _combiner.I.Add(i);
 
+                    _trashCan.Add(gameObject);
+                    _combiner.RelevantBuildings.Add(new List<GameObject>(_trashCan));
                     _garbageBin[i].AddRange(_trashCan);
                     _trashCan.Clear();
                 }

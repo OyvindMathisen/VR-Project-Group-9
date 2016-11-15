@@ -228,6 +228,7 @@ public class Combiner : MonoBehaviour
         Alternatives.Clear();
         Names.Clear();
         I.Clear();
+        RelevantBuildings.Clear();
         onceNoAlts = false;
         onceNewAlts = false;
 

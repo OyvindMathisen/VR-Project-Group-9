@@ -267,7 +267,10 @@ public class DragAndPlace : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(src.transform.position + src.transform.right*xSize*xPos[i] + new Vector3(0, 100, 0) + src.transform.forward*zSize*zPos[i], Vector3.down, out hit, 100, Tiles))
             {
-                if (hit.collider.tag != "Tile" && !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
+                if (hit.collider.tag != "Tile") continue;
+                var script = hit.transform.GetComponent<DragAndPlace>();
+                if (!script) continue; // If script is null.
+                if (!script.Placed) continue;
                 if (markedColliders.Contains(hit.collider.gameObject)) continue;
 
                 gameObjects.Add(hit.collider.gameObject);

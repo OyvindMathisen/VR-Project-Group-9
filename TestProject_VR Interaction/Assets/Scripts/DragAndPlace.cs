@@ -17,6 +17,9 @@ public class DragAndPlace : MonoBehaviour
     private Quaternion _lastSafeRot;
     private Combiner _combiner;
 
+    private List<GameObject> _connectedColliders = new List<GameObject>();
+    private List<GameObject> _markedColliders = new List<GameObject>();
+
     void Awake()
 	{
         _previewPlacement = GameObject.FindWithTag("PreviewPlacement");
@@ -52,14 +55,11 @@ public class DragAndPlace : MonoBehaviour
 
 		    if (!_onceNotPlaced)
 		    {
-                // TODO: improve canceling
-                _combiner.Cancel();
-
-                // to prevent raycasting self when checking for free area
-                foreach (var c in GetComponentsInChildren<Collider>())
-                {
-                    c.enabled = false;
-                }
+		        if (_combiner.Alternatives.Count > 0)
+		        {
+		            _combiner.Cancel();
+		            _combiner.PlayCancelSound();
+		        }
 
                 _oncePlaced = false;
 				ReachedHeight = false;
@@ -72,6 +72,12 @@ public class DragAndPlace : MonoBehaviour
             {
                 Placed = true;
                 _controller.IsHolding = false;
+
+                // to prevent raycasting self when checking for free area
+                foreach (var c in GetComponentsInChildren<Collider>())
+                {
+                    c.enabled = false;
+                }
 
                 if (!_areaCheck.IsAreaFree())
                 {
@@ -151,6 +157,7 @@ public class DragAndPlace : MonoBehaviour
 			var newPosition = Vector3.zero;
             newPosition.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
             newPosition.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
+		    newPosition.y = Mathf.Clamp(newPosition.y, GameSettings.BUILD_HEIGHT, 200f); // ground limiter
             newPosition.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
             transform.position = newPosition;
         }
@@ -163,10 +170,12 @@ public class DragAndPlace : MonoBehaviour
                 // Delete old previews lingering on the map
                 _areaCheck.DeletePreviews();
 
+                // to prevent raycasting self when checking for free area
                 foreach (var c in GetComponentsInChildren<Collider>())
                 {
                     c.enabled = true;
                 }
+
                 if (_placedWrong)
                 {
 					ReachedHeight = true;
@@ -223,13 +232,10 @@ public class DragAndPlace : MonoBehaviour
 		}
     }
 
-
-    List<GameObject> connectedTiles = new List<GameObject>();
-    List<GameObject> markedColliders = new List<GameObject>();
     void CheckConnectedTilesForCombo()
     {
-        connectedTiles.Clear();
-        markedColliders.Clear();
+        _connectedColliders.Clear();
+        _markedColliders.Clear();
 
 		// If no child is found, it's an older building. No need to raycast.
 		if (transform.childCount == 0)
@@ -237,21 +243,19 @@ public class DragAndPlace : MonoBehaviour
 		
 		RaycastForConnectedTiles(transform.FindChild("Collider1").gameObject);
 
-        List<GameObject> connectedTilesParents = new List<GameObject>();
+        var connectedBuildings = new List<GameObject>();
 
-        foreach (var child in connectedTiles)
+        foreach (var cc in _connectedColliders)
         {
-            if (!connectedTilesParents.Contains(child.transform.parent.gameObject))
-                connectedTilesParents.Add(child.transform.parent.gameObject);
+            if (!connectedBuildings.Contains(cc.transform.parent.gameObject))
+                connectedBuildings.Add(cc.transform.parent.gameObject);
         }
 
-        foreach (var tile in connectedTilesParents)
+        foreach (var tile in connectedBuildings)
         {
             tile.transform.SendMessage("CheckForCombos", -2, SendMessageOptions.DontRequireReceiver);
         }
     }
-
-    
 
     void RaycastForConnectedTiles(GameObject src)
     {
@@ -271,17 +275,17 @@ public class DragAndPlace : MonoBehaviour
                 var script = hit.transform.GetComponent<DragAndPlace>();
                 if (!script) continue; // If script is null.
                 if (!script.Placed) continue;
-                if (markedColliders.Contains(hit.collider.gameObject)) continue;
+                if (_markedColliders.Contains(hit.collider.gameObject)) continue;
 
                 gameObjects.Add(hit.collider.gameObject);
-                markedColliders.Add(hit.collider.gameObject);
+                _markedColliders.Add(hit.collider.gameObject);
             }
         }
 
         foreach (var obj in gameObjects)
             RaycastForConnectedTiles(obj);
 
-        connectedTiles.AddRange(gameObjects);
+        _connectedColliders.AddRange(gameObjects);
     }
 
     void OnTriggerStay(Collider other)

@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-using System;
 
 
 public class Combiner : MonoBehaviour
@@ -16,27 +14,19 @@ public class Combiner : MonoBehaviour
 
     public GameObject RelevantTile;
 
-    public List<GameObject> Triggered = new List<GameObject>();
-
-    private Transform _indicator, _timer, _wall, _wrap, _previewPlacement;
+    private Indicator _indicator;
+    private Transform _timer, _wall, _wrap, _previewPlacement;
     private TextMesh _name, _number, _name2, _number2;
     public float time, next;
     private float nextDelay;
     private float _timerWidth;
     private const float CharacterWidth = 0.6f;
 
-    public bool onceNewAlts, onceNoAlts;
+    public bool onceNewAlts;
 
-    private GameObject _rightController;
-    private Wand _controller;
-
-    // only temporary for developing on pc (so GripButtonDown can be triggered once)
-    private bool tempReset;
-
-    private const float INDICATOR_HEIGHT = 110f;
     void Awake()
     {
-        _indicator = transform.FindChild("Indicator");
+        _indicator = transform.FindChild("Indicator").GetComponent<Indicator>();
         _indicator.gameObject.SetActive(false);
         _timer = _indicator.transform.FindChild("Timer");
         _wall = _indicator.transform.FindChild("Wall");
@@ -51,26 +41,11 @@ public class Combiner : MonoBehaviour
         nextDelay = GameSettings.COMBO_DECISION_TIME;
     }
 
-	void Start() {
-		_rightController = HMDComponents.getRightController();
-		_controller = HMDComponents.getRightWand();
-	}
-
     // Update is called once per frame
     private void Update()
     {
-        // TODO: atm it's just rotating, but we could make it so it's always facing camera (if that's better, we don't know yet)
-        _indicator.Rotate(0, 160 * Time.deltaTime, 0);
-        
+        if (!_indicator.Dragging)
         time += Time.deltaTime;
-
-        // if the tile have a high building
-        if (Triggered.Count > 0)
-        {
-            var newPos = _indicator.transform.position;
-            newPos.y = Mathf.Lerp(_indicator.transform.position.y, _indicator.transform.position.y + 3, 0.05f);
-            _indicator.transform.position = newPos;
-        }
 
         if (Alternatives.Count > 0)
         {
@@ -79,31 +54,21 @@ public class Combiner : MonoBehaviour
             {
                 // placing indicator (to know what's about to get combined)
                 _indicator.gameObject.SetActive(true);
-                NewIndPos();
-
+                NewIndicatorPos();
                 UpdateUI();
 
                 var sfx = _previewPlacement.FindChild("sfxNewCombo").GetComponent<AudioSource>();
                 sfx.pitch = 0.05f * (RelevantBuildings[0].Count-2) + 1.0f;
                 sfx.Play();
 
-                onceNoAlts = false;
                 onceNewAlts = true;
             }
 
             if (time > next)
             {
-                // time's up - the combination have been decided
-                Alternatives[0].gameObject.SendMessage("CheckForCombos", I[0]);
-                Alternatives.Clear();
-                Names.Clear();
-                I.Clear();
-                RelevantBuildings.Clear();
-                CleanWrap();
-
-                var sfx = _previewPlacement.FindChild("sfxCombine").GetComponent<AudioSource>();
-                sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
-                sfx.Play();
+                // time's up - cancel process
+                Cancel();
+                PlayCancelSound();
             }
             else
             {
@@ -112,70 +77,11 @@ public class Combiner : MonoBehaviour
                 newScale.x = _timerWidth * ((next - time) / nextDelay);
                 _timer.localScale = newScale;
             }
-
-            if (_controller.GripButtonDown && Alternatives.Count > 1)
-            {
-                // canceling when there is still combination alternatives left
-                if (!tempReset)
-                {
-                    Alternatives.RemoveAt(0);
-                    Names.RemoveAt(0);
-                    I.RemoveAt(0);
-                    RelevantBuildings.RemoveAt(0);
-
-                    next = time + nextDelay;
-                    NewIndPos();
-                    UpdateUI();
-                    tempReset = true;
-
-                    var sfx = _previewPlacement.FindChild("sfxUI1").GetComponent<AudioSource>();
-                    sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
-                    sfx.Play();
-                }
-            }
-            else if (_controller.GripButtonDown)
-            {
-                // the last alternative was canceled
-                if (!tempReset)
-                {
-                    Alternatives.RemoveAt(0);
-                    Names.RemoveAt(0);
-                    I.RemoveAt(0);
-                    RelevantBuildings.RemoveAt(0);
-
-                    UpdateUI();
-                    tempReset = true;
-
-                    var sfx = _previewPlacement.FindChild("sfxCancel").GetComponent<AudioSource>();
-                    sfx.pitch = UnityEngine.Random.Range(0.8f, 1.0f);
-                    sfx.Play();
-                }
-            }
-
-            if (_controller.GripButtonUp)
-            {
-                tempReset = false;
-            }
         }
         else
         {
             next = time + nextDelay;
-            if (!onceNoAlts)
-            {
-                _indicator.gameObject.SetActive(false);
-
-                onceNewAlts = false;
-                onceNoAlts = true;
-            }
         }
-    }
-
-    private void NewIndPos()
-    {
-        var newPos = _indicator.position;
-        newPos.x = Alternatives[0].transform.position.x;
-        newPos.z = Alternatives[0].transform.position.z;
-        _indicator.position = newPos;
     }
 
     private void UpdateUI()
@@ -198,10 +104,6 @@ public class Combiner : MonoBehaviour
         _number2.text = _number.text;
 
         _wall.localScale = newScale;
-
-        var temp = _indicator.localPosition;
-        temp.y = INDICATOR_HEIGHT;
-        _indicator.localPosition = temp;
 
         // showing new relevant tiles for current combo alternative
         CleanWrap();
@@ -229,15 +131,18 @@ public class Combiner : MonoBehaviour
         Names.Clear();
         I.Clear();
         RelevantBuildings.Clear();
-        onceNoAlts = false;
-        onceNewAlts = false;
-
-        _indicator.gameObject.SetActive(false);
-        var temp = _indicator.localPosition;
-        temp.y = INDICATOR_HEIGHT;
-        _indicator.localPosition = temp;
 
         CleanWrap();
+        _indicator.gameObject.SetActive(false);
+
+        onceNewAlts = false;
+    }
+
+    public void PlayCancelSound()
+    {
+        var sfx = _previewPlacement.FindChild("sfxCancel").GetComponent<AudioSource>();
+        sfx.pitch = UnityEngine.Random.Range(0.8f, 0.9f);
+        sfx.Play();
     }
 
     private void CleanWrap()
@@ -249,5 +154,55 @@ public class Combiner : MonoBehaviour
         }
     }
 
-    
+    private void NewIndicatorPos()
+    {
+        var newPos = _indicator.transform.position;
+        newPos.x = Alternatives[0].transform.position.x;
+        newPos.z = Alternatives[0].transform.position.z;
+
+        // if the tile have a high building
+        newPos.y = GameSettings.BUILD_HEIGHT +
+                   (Alternatives[0].transform.FindChild("Collider1").GetComponent<BoxCollider>().size.y * GameSettings.SNAP_VALUE);
+
+        _indicator.transform.position = newPos;
+
+        // for lerping back to where it was if releasing before reaching threshold
+        _indicator.ThisStartPosY = _indicator.transform.position.y;
+    }
+
+    public void NextAlternative()
+    {
+        if (Alternatives.Count > 1)
+        {
+            // canceling when there is still combination alternatives left
+            Alternatives.RemoveAt(0);
+            Names.RemoveAt(0);
+            I.RemoveAt(0);
+            RelevantBuildings.RemoveAt(0);
+
+            next = time + nextDelay;
+
+            NewIndicatorPos();
+            UpdateUI();
+
+            var sfx = _previewPlacement.FindChild("sfxUI0").GetComponent<AudioSource>();
+            sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
+            sfx.Play();
+        }
+        else
+        {
+            Cancel();
+            PlayCancelSound();
+        }
+    }
+
+    public void Combine()
+    {
+        Alternatives[0].gameObject.SendMessage("CheckForCombos", I[0]);
+        Cancel();
+
+        var sfx = _previewPlacement.FindChild("sfxCombine").GetComponent<AudioSource>();
+        sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
+        sfx.Play();
+    }
 }

@@ -4,13 +4,13 @@ using System.Linq;
 
 public class Vegetation : MonoBehaviour
 {
-    public List<GameObject> _triggered = new List<GameObject>();
-    public List<DragAndPlace> _tileScripts = new List<DragAndPlace>();
-    public bool placed;
+    private List<GameObject> _triggered = new List<GameObject>();
+    private List<DragAndPlace> _tileScripts = new List<DragAndPlace>();
+    private bool _placed;
 
-    public List<MeshRenderer> _childrenMR = new List<MeshRenderer>();
-    public bool _fadeBack;
-    public float _alpha;
+    private List<MeshRenderer> _childrenMR = new List<MeshRenderer>();
+    private bool _fadeBack, _setShader;
+    private float _alpha;
 	void Awake ()
 	{
 	    _childrenMR = transform.GetComponentsInChildren<MeshRenderer>().ToList();
@@ -18,7 +18,7 @@ public class Vegetation : MonoBehaviour
 
 	void Update ()
 	{
-	    if (!placed)
+	    if (!_placed)
 	    {
 	        if (_tileScripts.Count == 0) return;
             foreach (var script in _tileScripts)
@@ -28,7 +28,7 @@ public class Vegetation : MonoBehaviour
                     _alpha = 0;
                     SetChildrenAlpha();
                     _fadeBack = false;
-                    placed = true;
+                    _placed = true;
 	                break;
 	            }
 	        }
@@ -39,6 +39,11 @@ public class Vegetation : MonoBehaviour
 	        SetChildrenAlpha();
 	        _alpha += 0.1f*Time.deltaTime;
 	    }
+        else if (!_setShader && _alpha >= 1)
+        {
+            // TODO: change shaders to get shadows when it's not transparent
+            _setShader = false;
+        }
 	}
 
     private void SetChildrenAlpha()
@@ -62,7 +67,7 @@ public class Vegetation : MonoBehaviour
             _tileScripts.Add(script);
         }
 
-        placed = false;
+        _placed = false;
         CancelInvoke();
     }
     void OnTriggerExit(Collider other)

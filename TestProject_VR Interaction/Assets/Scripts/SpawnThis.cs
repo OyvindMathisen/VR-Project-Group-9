@@ -2,32 +2,19 @@
 
 public class SpawnThis : MonoBehaviour
 {
-	public Transform ObjectToSpawn;
-	private Wand Rhand;
+	public GameObject ObjectToSpawn;
+	private Wand _controller;
 
-	void Awake () {
-		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
-	}
-
-    void FixedUpdate()
+	void Start ()
     {
-        transform.Rotate(0, 1, 0);
-    }
+		_controller = HMDComponents.getRightWand();
+	}
 
 	void OnTriggerStay(Collider other)
 	{
-		if (other.tag == "Rhand")
-		{
-			if (Rhand.triggerButtonDown)
-			{
-				var temp = Rhand.transform.position;
-				temp.x = Mathf.Round(temp.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-				temp.z = Mathf.Round(temp.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
+	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown) return;
 
-				Instantiate(ObjectToSpawn, Rhand.transform.position, Quaternion.identity);
-
-				root.isHolding = true;
-			}
-		}
+		Instantiate (ObjectToSpawn, _controller.transform.position, Quaternion.identity);
+	    _controller.IsHolding = true;
 	}
 }

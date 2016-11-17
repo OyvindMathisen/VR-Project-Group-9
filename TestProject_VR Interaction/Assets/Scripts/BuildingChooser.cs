@@ -1,125 +1,120 @@
 ﻿using UnityEngine;
-using System.Collections;
-using Immerseum.VRSimulator;
+using System.Linq;
 
-public class BuildingChooser : MonoBehaviour {
-
-    public Transform[] Buildings, Landscapes;
-    public Transform[] previewBuildings, previewLandscapes;
-	public int tileType = 0;
-    private int currentTileB, currentTileL = 0;
-    private GameObject currentPreview;
+public class BuildingChooser : MonoBehaviour
+{
+    public Transform[] Buildings, Landscapes, PreviewBuildings, PreviewLandscapes;
+	public int TileType = 0;
+    private int _currentTileB, _currentTileL = 0;
     public Transform Panel;
 
-	private Wand Lhand;
-	private bool hasSwitched = false;
+    public GameObject LeftController;
+	private Wand _Lhand;
+	private bool _hasSwitched = false;
 	
-	void Awake () {
+	void Awake ()
+    {
         ShowPreview(0, 0);
-
-		Lhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (left)").GetComponent<Wand>();
+		_Lhand = LeftController.GetComponent<Wand>();
 	}
 
     // spawns the previews of the tiles in the panel
-    void ShowPreview(int tileType_internal, int tileNumber)
+    void ShowPreview(int tileTypeInternal, int tileNumber)
     {
 		// Remove old copies of the preview tile from the left hand.
         Transform[] allChildren = transform.parent.GetComponentsInChildren<Transform>();
-        foreach (Transform child in allChildren)
+        foreach (Transform child in allChildren.Where(child => child.tag == "PreviewTile"))
         {
-            if (child.tag == "PreviewTile")
-            {
-                Destroy(child.gameObject);
-            }
+            Destroy(child.gameObject);
         }
 
-        if (tileType_internal == 0)
+        switch (tileTypeInternal)
         {
-            Instantiate(previewBuildings[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
+            case 0:
+                Instantiate(PreviewBuildings[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
+                break;
+            case 1:
+                Instantiate(PreviewLandscapes[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
+                break;
         }
-
-        else if (tileType_internal == 1)
-        {
-            Instantiate(previewLandscapes[tileNumber], transform.position + new Vector3(0f, 0.02f, 0f), Quaternion.identity, Panel);
-		}
         
     }
 
     void Update()
     {
 		// Changing building in your selector
-		if (Lhand.touchpadRight && !hasSwitched)
+		if (_Lhand.TouchpadRight && !_hasSwitched)
 		{
-			switch (tileType)
+			switch (TileType)
 			{
 				case 0:
-					currentTileB++;
-					if (currentTileB == Buildings.Length)
+					_currentTileB++;
+					if (_currentTileB == Buildings.Length)
 					{
-						currentTileB = 0;
+						_currentTileB = 0;
 					}
-					ShowPreview(0, currentTileB);
-					hasSwitched = true;
+					ShowPreview(0, _currentTileB);
+					_hasSwitched = true;
 					break;
 				case 1:
-					currentTileL++;
-					if (currentTileL == Landscapes.Length)
+					_currentTileL++;
+					if (_currentTileL == Landscapes.Length)
 					{
-						currentTileL = 0;
+						_currentTileL = 0;
 					}
-                    ShowPreview(1, currentTileL);
-					hasSwitched = true;
+                    ShowPreview(1, _currentTileL);
+					_hasSwitched = true;
 					break;
 			}
 		}
 
-		if (Lhand.touchpadLeft && !hasSwitched)
+		if (_Lhand.TouchpadLeft && !_hasSwitched)
 		{
-			switch (tileType)
+			switch (TileType)
 			{
 				case 0:
-					currentTileB--;
-					if (currentTileB == -1)
+					_currentTileB--;
+					if (_currentTileB == -1)
 					{
-						currentTileB = Buildings.Length - 1;
+						_currentTileB = Buildings.Length - 1;
 					}
-					ShowPreview(0, currentTileB);
-					hasSwitched = true;
+					ShowPreview(0, _currentTileB);
+					_hasSwitched = true;
 					break;
 				case 1:
-					currentTileL--;
-					if (currentTileL == -1)
+					_currentTileL--;
+					if (_currentTileL == -1)
 					{
-						currentTileL = Landscapes.Length - 1;
+						_currentTileL = Landscapes.Length - 1;
 					}
-					ShowPreview(1, currentTileL);
-					hasSwitched = true;
+					ShowPreview(1, _currentTileL);
+					_hasSwitched = true;
 					break;
 			}
 		}
 
-		if (Lhand.touchpadUp && !hasSwitched)
+		if (_Lhand.TouchpadUp && !_hasSwitched)
 		{
-			tileType++;
-			if (tileType >= 2)
-				tileType = 0;
-			ShowPreview(tileType, currentTileB);
-			hasSwitched = true;
+			TileType++;
+			if (TileType >= 2)
+				TileType = 0;
+			ShowPreview(TileType, _currentTileB);
+			_hasSwitched = true;
 		}
 
-		if (Lhand.touchpadDown && !hasSwitched)
+		if (_Lhand.TouchpadDown && !_hasSwitched)
         {
-			tileType--;
-			if (tileType <= -1)
-				tileType = 1;
-            ShowPreview(tileType, currentTileL);
-            hasSwitched = true;
+			TileType--;
+			if (TileType <= -1)
+				TileType = 1;
+            ShowPreview(TileType, _currentTileL);
+            _hasSwitched = true;
 		}
 
-		// Prevents scrolling through the menu stupidly quickly
-		if (!Lhand.touchpadRight && !Lhand.touchpadLeft && !Lhand.touchpadUp && !Lhand.touchpadDown)
+		// Prevents scrolling through the menu once per frame.
+		if (!_Lhand.TouchpadRight && !_Lhand.TouchpadLeft && !_Lhand.TouchpadUp && !_Lhand.TouchpadDown)
 		{
-			hasSwitched = false;
+			_hasSwitched = false;
 		}
     }
 }

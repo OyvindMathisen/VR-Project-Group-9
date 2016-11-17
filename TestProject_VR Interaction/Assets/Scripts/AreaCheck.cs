@@ -1,211 +1,91 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
-public class AreaCheck : MonoBehaviour {
-
-	private CheckCollision[] checkCollisions = new CheckCollision[8];
-	private GameObject[] buildings = new GameObject[8];
-	private string[] bNames = new string[8];
-    public LayerMask tiles;
-
+public class AreaCheck : MonoBehaviour
+{
+    public GameObject RightHand;
+    public LayerMask Tiles;
     public GameObject Preview;
-    public GameObject Villa;
+    public int PreviewCount; // not used atm
+    public Vector3 DistanceToPreviewPlacement;
+    public Transform HeldObject;
+	private Vector3 _curPosition;
+    private const float OffsetY = -4;
+    private Wand _controller;
+    private Transform _wrap;
 
-    private bool onceNotHolding;
-    public int previewCount;
+    void Awake ()
+    {
+        _wrap = transform.FindChild("Wrap");
+        DistanceToPreviewPlacement = Vector3.zero;
+    }
 
-	private Vector3 curPosition;
-	private Wand Rhand;
-
-    private const float offsetY = -4;
-
-
-    void Awake()
+	void Start ()
 	{
-		Rhand = GameObject.Find("[CameraRig]").transform.FindChild("Controller (right)").GetComponent<Wand>();
-		root.currentDrag = Rhand.transform; // Setting currentDrag to a value to prevent accessing a blank variable.
+		_controller = HMDComponents.getRightWand();
 	}
 
 	void Update ()
 	{
-		// TODO: Tile is placed one off in the opposite Z direction of the side you grab the tile. This needs to be fixed.
+        if (_controller.IsHolding && HeldObject != null)
+            _curPosition = HeldObject.position + DistanceToPreviewPlacement;
+        else
+            _curPosition = RightHand.transform.position;
 
-		if (root.isHolding && root.currentDrag != null)
-			curPosition = root.currentDrag.position + root.distToPP;
-		else
-			curPosition = Rhand.transform.position;
+	    var currentX = Mathf.Round(_curPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+		var currentZ = Mathf.Round(_curPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
 
-	    float currentX = Mathf.Round(curPosition.x * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-		float currentZ = Mathf.Round(curPosition.z * root.SNAP_INVERSE) / root.SNAP_INVERSE;
-
-		transform.position = new Vector3(currentX, root.BUILD_HEIGHT-offsetY, currentZ);
+		transform.position = new Vector3(currentX, GameSettings.BUILD_HEIGHT-OffsetY, currentZ);
 	}
 
-	/*
-	* @Parameter The building (cg, current gameobject) you're scanning for it's children to find out the position of the preview meshes.
-	*/
-    public void NewPreviewArea(GameObject cg)
+    public void NewPreviewArea(GameObject currentGameObject)
     {
-		DeletePreviews();
-		foreach (Transform child in cg.transform)
+        var temp = transform.position;
+        temp.x = currentGameObject.transform.position.x;
+        temp.z = currentGameObject.transform.position.z;
+        transform.position = temp;
+
+        _wrap.rotation = Quaternion.identity;
+
+        DeletePreviews();
+		foreach (Transform child in currentGameObject.transform)
 		{
-			var newPreview = Instantiate(Preview, new Vector3(child.transform.position.x, root.BUILD_HEIGHT, child.transform.position.z), Quaternion.identity) as GameObject;
-			newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform.FindChild("Wrap");
+			if (child.tag != "Tile") continue; // Only do this for objects tagged as locations for the preview area.
+			var newPreview = Instantiate(Preview);
+            // Check if newPreview is null. If so, skip over this part.
+		    if (newPreview == null) continue;
+		    newPreview.transform.parent = _wrap;
 			newPreview.transform.localScale = Vector3.one;
+		    newPreview.transform.position = new Vector3(child.transform.position.x, GameSettings.BUILD_HEIGHT+GameSettings.PREVIEW_HEIGHT_ADJUST, child.transform.position.z);
+		    PreviewCount++;
 		}
-
-		/*
-        const int y = 200;
-        int x = -16, z = -16;
-
-        for (var i = 0; i < 25; i++)
-        {
-			// checking for buildings held from above
-            RaycastHit hit;
-			Debug.Log("v");
-			if (Physics.Raycast(transform.position + new Vector3(x, y, z), Vector3.down, out hit, Mathf.Infinity, tiles))
-            {
-				// if the object is a tile
-				Debug.Log("0v");
-				if (hit.collider.tag == "Tile")
-                {
-					// and if the object held is not placed yet
-					Debug.Log("1v");
-					if (!hit.transform.GetComponent<DragAndPlace>().placed)
-                    {
-						Debug.Log("2v");
-						var newPreview = Instantiate(Preview, transform.position + new Vector3(x, 0, z), Quaternion.identity) as GameObject;
-                        newPreview.transform.parent = GameObject.Find("PreviewPlacement").transform.FindChild("Wrap");
-                        newPreview.transform.localScale = Vector3.one;
-                        previewCount++;
-                    }
-                }
-            }
-
-            x += 8;
-            if (x != 16) continue;
-            z += 8;
-            x = -16;
-			
-        }
-
-        onceNotHolding = false;
-		*/
 	}
 
 	public void DeletePreviews()
     {
-        foreach (Transform child in transform.FindChild("Wrap"))
+        foreach (Transform child in _wrap)
         {
             if (child.gameObject.name.StartsWith("Preview"))
                 Destroy(child.gameObject);
         }
-        previewCount = 0;
+        PreviewCount = 0;
     }
 
     public bool IsAreaFree()
     {
-        foreach (Transform child in transform)
+        foreach (Transform child in _wrap)
         {
             if (child.gameObject.name.StartsWith("Preview"))
             {
                 RaycastHit hit;
-                if (Physics.Raycast(child.position + new Vector3(0, -20, 0), Vector3.up, out hit, Mathf.Infinity, tiles))
-                {
-                    if (hit.collider.tag == "Tile")
-                    {
-                        if (hit.transform.GetComponent<DragAndPlace>().placed)
-                        {
-                            return false;
-                        }
-                    }
-                }
+                if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, Mathf.Infinity, Tiles) &&
+                    hit.collider.tag == "Tile" &&
+                    hit.transform.GetComponent<DragAndPlace>().Placed)
+                    return false;
             }
         }
         return true;
     }
-
-	/*public void CheckForValidCombo(GameObject obj)
-	{
-		//var temp[] = new GameObject[8];
-		//temp[1].transform
-
-		for (var i = 0; i < 8; i++)
-		{
-		    if (checkCollisions[i].getTile() != null)
-		    {
-		        buildings[i] = checkCollisions[i].getTile();
-
-		        var temp = buildings[i].name.Split('(');
-		        bNames[i] = temp[0];
-		    }
-		}
-
-		var objTemp = obj.name.Split('(');
-		var objName = objTemp[0];
-
-	    switch (objName)
-	    {
-	        case "House":
-	            if (bNames[0] == "LuxuryHouse" && bNames[1] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.left * 8, Quaternion.Euler(0, 180, 0));
-	                Destroy(buildings[0].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[1] == "LuxuryHouse" && bNames[2] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.forward * 8, Quaternion.Euler(0, 0, 0));
-	                Destroy(buildings[1].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[2] == "LuxuryHouse" && bNames[3] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.forward * 8, Quaternion.Euler(0, 270, 0));
-	                Destroy(buildings[2].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[3] == "LuxuryHouse" && bNames[4] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.right * 8, Quaternion.Euler(0, 90, 0));
-	                Destroy(buildings[3].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[4] == "LuxuryHouse" && bNames[5] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.right * 8, Quaternion.Euler(0, 0, 0));
-	                Destroy(buildings[4].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[5] == "LuxuryHouse" && bNames[6] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.back * 8, Quaternion.Euler(0, 180, 0));
-	                Destroy(buildings[5].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[6] == "LuxuryHouse" && bNames[7] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.back * 8, Quaternion.Euler(0, 90, 0));
-	                Destroy(buildings[6].gameObject);
-	                Destroy(obj);
-	            }
-	            else if (bNames[7] == "LuxuryHouse" && bNames[0] == "LuxuryHouse")
-	            {
-	                var tile = Instantiate(Villa, transform.position + Vector3.left * 8, Quaternion.Euler(0, 270, 0));
-	                Destroy(buildings[7].gameObject);
-	                Destroy(obj);
-	            }
-	            break;
-	        case "LuxuryHouse":
-
-	            break;
-	    }
-
-		for (var j = 0; j < bNames.Length; j++) {
-			buildings[j] = null;
-			bNames[j] = "";
-		}
-
-    }*/
 }

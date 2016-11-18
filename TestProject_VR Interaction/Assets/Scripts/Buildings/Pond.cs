@@ -24,12 +24,12 @@ public class Pond : MonoBehaviour {
 		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
 	    _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
 
-        xPos = new[] { 1, 1, 0, 1, 1, 0, 1, 0, -1,  0, 1, 1, 0 };
-        zPos = new[] { 0, 1, 1, 0, 1, 1, 0, 1,  0, -1, 0, -1, -1 };
+        xPos = new[] { 1, 1, 0, 1, 1, 0, 1,  0, -1,  0,   1,  1,  0 };
+        zPos = new[] { 0, 1, 1, 0, 1, 1, 0,  1,  0, -1,   0, -1, -1 };
 
-        xAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        zAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-      rotAdj = new[] { 0, 0, 0, 0, 0, 0, 90, 0, -90, 180, 0, 0, 90 };
+        xAdj = new[] { 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,   0,  0,  0 };
+        zAdj = new[] { 0, 0, 0, 0, 0, 0, 0,  0,  0,  0,   0,  0,  0 };
+      rotAdj = new[] { 0, 0, 0, 0, 0, 0, 90, 0, -90, 180, 0,  0,  90 };
     }
 
     void CheckForCombos(int I)
@@ -73,6 +73,7 @@ public class Pond : MonoBehaviour {
                     }
                     else if (hit.transform.name.StartsWith("Pond") && i > 5 && i < 10)
                     {
+                        _trashCan.Clear();
                         _trashCan.Add(hit.transform.gameObject);
                         result = SwimmingPool;
                     }

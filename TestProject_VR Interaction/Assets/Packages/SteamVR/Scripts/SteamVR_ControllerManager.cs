@@ -45,7 +45,7 @@ public class SteamVR_ControllerManager : MonoBehaviour
 			var obj = objects[i];
 			if (obj != null) { }
             // TODO: UNDO
-				obj.SetActive(false);
+				//obj.SetActive(false);
 		}
 
 		OnTrackedDeviceRoleChanged();

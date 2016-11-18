@@ -1,5 +1,5 @@
 ﻿// this shader is a replacement for the standard transparent and fade shader due to strange depth order issues.
-Shader "Transparent/VertexLit with Z" {
+Shader "Transparent/VertexLitWithZ" {
 	Properties{
 		_Color("Main Color", Color) = (1,1,1,1)
 		_MainTex("Base (RGB) Trans (A)", 2D) = "white" {}

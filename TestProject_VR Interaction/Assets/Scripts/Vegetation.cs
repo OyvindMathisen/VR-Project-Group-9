@@ -1,83 +1,73 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 
 public class Vegetation : MonoBehaviour
 {
     private List<GameObject> _triggered = new List<GameObject>();
     private List<DragAndPlace> _tileScripts = new List<DragAndPlace>();
-    private bool _placed;
 
     private List<MeshRenderer> _childrenMR = new List<MeshRenderer>();
-    private bool _fadeBack, _setShader;
+    private bool _fadeBack;
     private float _alpha;
-	void Awake ()
+    private Shader _withShadow, _withoutShadow;
+
+    private float _addedAlpha;
+    void Awake ()
 	{
 	    _childrenMR = transform.GetComponentsInChildren<MeshRenderer>().ToList();
+        // need to change shaders because the standard shader is not showing the transparent models correctly
+	    _withShadow = Shader.Find("Standard");
+	    _withoutShadow = Shader.Find("Transparent/VertexLitWithZ");
 	}
 
 	void Update ()
 	{
-	    if (!_placed)
-	    {
-	        if (_tileScripts.Count == 0) return;
-            foreach (var script in _tileScripts)
-	        {
-	            if (script.Placed)
-	            {
-                    _alpha = 0;
-                    SetChildrenAlpha();
-                    _fadeBack = false;
-                    _placed = true;
-	                break;
-	            }
-	        }
-	    }
-
-	    if (_fadeBack && _alpha < 1)
-	    {
-	        SetChildrenAlpha();
-	        _alpha += 0.1f*Time.deltaTime;
-	    }
-        else if (!_setShader && _alpha >= 1)
+        if (_fadeBack && _alpha < 1)
         {
-            // TODO: change shaders to get shadows when it's not transparent
-            _setShader = false;
+            SetChildrenAlpha(_alpha);
+            _alpha += _addedAlpha * Time.deltaTime;
+            _addedAlpha += 0.001f;
+            if (_alpha > 0.8f)
+            {
+                _fadeBack = false;
+                SetChildrenShader(true);
+                _addedAlpha = 0.001f;
+            }
         }
-	}
+    }
 
-    private void SetChildrenAlpha()
+    private void SetChildrenAlpha(float alpha)
     {
         foreach (var childMR in _childrenMR)
         {
             var oldColor = childMR.material.color;
-            var color = new Color(oldColor.r, oldColor.g, oldColor.b, _alpha);
+            var color = new Color(oldColor.r, oldColor.g, oldColor.b, alpha);
             childMR.material.SetColor("_Color", color);
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    private void SetChildrenShader(bool with)
     {
-        if (other.tag != "Tile") return;
-        var script = other.transform.parent.GetComponent<DragAndPlace>();
-        if (!script) return;
-        if (!_triggered.Contains(other.gameObject))
-        {
-            _triggered.Add(other.gameObject);
-            _tileScripts.Add(script);
-        }
-
-        _placed = false;
-        CancelInvoke();
+        foreach (var childMR in _childrenMR)
+            childMR.material.shader = with ? _withShadow : _withoutShadow;
     }
-    void OnTriggerExit(Collider other)
-    {
-        if (other.tag != "Tile") return;
-        var script = other.transform.parent.GetComponent<DragAndPlace>();
-        if (!script) return;
 
-        _triggered.Remove(other.gameObject);
-        _tileScripts.Remove(script);
+    public void Hide()
+    {
+        CancelInvoke();
+        _fadeBack = false;
+        Debug.Log("hide!");
+        _alpha = 0;
+        SetChildrenShader(false);
+        SetChildrenAlpha(_alpha);
+    }
+
+    public void Show()
+    {
+        CancelInvoke();
+        Debug.Log("show!");
         Invoke("FadeBack", Random.Range(12f, 24f));
     }
 

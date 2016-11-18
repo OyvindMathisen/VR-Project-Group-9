@@ -6,7 +6,7 @@ public class Indicator : MonoBehaviour
     public bool Dragging;
     public float ThisStartPosY;
 
-    private const float THRESHOLD_UP = 3, THRESHOLD_DOWN = -3;
+    private const float THRESHOLD_UP = 9, THRESHOLD_DOWN = -12;
 
     private Combiner _combiner;
     private Wand _controllerR, _controllerL;
@@ -56,7 +56,12 @@ public class Indicator : MonoBehaviour
                 Dragging = false;
             }
         }
+    }
 
+    // todo: late update actually needed? if not, is bug fixed?
+    // bug: når man slipper bygningen for andre gang så kommer man automatisk inn i velge kombinasjons opp eller ned
+    void LateUpdate()
+    {
         // when dragging the indicator up or down to decide what to do
         if (Dragging)
         {
@@ -67,18 +72,18 @@ public class Indicator : MonoBehaviour
             newPos.y = _thisBeginPosY + currentY;
             transform.position = newPos;
 
-            if (transform.position.y > ThisStartPosY)
+            if (transform.position.y > ThisStartPosY + 0.1f)
             {
                 var oldColor = _arrowMR.material.color;
                 var alpha = 1 - ((transform.position.y - ThisStartPosY) / THRESHOLD_UP);
                 var color = new Color(oldColor.r, oldColor.g, oldColor.b, alpha);
-               _arrowMR.material.SetColor("_Color", color);
+                _arrowMR.material.SetColor("_Color", color);
             }
-            else
+            else if (transform.position.y < ThisStartPosY - 0.1f)
             {
                 var newScale = _arrowMesh.localScale;
                 var percent = ((transform.position.y - ThisStartPosY) / THRESHOLD_DOWN);
-                newScale.y = _arrowWidth + 0.45f*percent;
+                newScale.y = _arrowWidth + 0.45f * percent;
                 newScale.z = _arrowWidth + 0.9f * percent;
                 _arrowMesh.localScale = newScale;
             }

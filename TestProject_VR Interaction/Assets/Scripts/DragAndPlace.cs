@@ -20,6 +20,8 @@ public class DragAndPlace : MonoBehaviour
     private List<GameObject> _connectedColliders = new List<GameObject>();
     private List<GameObject> _markedColliders = new List<GameObject>();
 
+    private LayerMask _vegetation;
+
     void Awake()
 	{
         _previewPlacement = GameObject.FindWithTag("PreviewPlacement");
@@ -27,6 +29,8 @@ public class DragAndPlace : MonoBehaviour
 	    _lastSafePos = Vector3.zero;
 
         _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+
+        _vegetation = _areaCheck.VegetationLayer;
 
         transform.parent = GameObject.Find("Tiles").transform;
 
@@ -167,6 +171,14 @@ public class DragAndPlace : MonoBehaviour
             
             if (!_oncePlaced)
             {
+                // hide vegetation at the building area
+                foreach (Transform tile in _areaCheck.FeaturedVegTiles)
+                {
+                    var script = tile.transform.GetComponent<Vegetation>();
+                    if (!script) continue;
+                    script.Hide();
+                }
+
                 // Delete old previews lingering on the map
                 _areaCheck.DeletePreviews();
 
@@ -294,6 +306,18 @@ public class DragAndPlace : MonoBehaviour
         _areaCheck.NewPreviewArea(gameObject);
         _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
         _distToHand = transform.position - _controller.transform.position;
+
+        // start fade-in on vegetation where the building has been
+        foreach (Transform child in transform)
+        {
+            if (!child.name.StartsWith("Collider")) continue;
+            RaycastHit hit;
+            if (!Physics.Raycast(child.position + Vector3.down*20, Vector3.up, out hit, 30, _vegetation)) continue;
+
+            var script = hit.transform.GetComponent<Vegetation>();
+            if (!script) continue;
+            script.Show();
+        }
 
         if (Placed)
 	    {

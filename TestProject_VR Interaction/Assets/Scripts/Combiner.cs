@@ -20,7 +20,8 @@ public class Combiner : MonoBehaviour
     public float time, next;
     private float nextDelay;
     private float _timerWidth;
-    private const float CharacterWidth = 0.6f;
+    private const float CHAR_WIDTH = 0.6f;
+    private const float INDICATOR_Y_ADJUST = 8f;
 
     public bool onceNewAlts;
 
@@ -91,7 +92,7 @@ public class Combiner : MonoBehaviour
         if (altCount >= 0)
         {
             _name.text = Names[0];
-            newScale.x = Names[0].Length * CharacterWidth;
+            newScale.x = Names[0].Length * CHAR_WIDTH;
             _number.text = "" + altCount;
         }
         else
@@ -162,7 +163,7 @@ public class Combiner : MonoBehaviour
 
         // if the tile have a high building
         newPos.y = GameSettings.BUILD_HEIGHT +
-                   (Alternatives[0].transform.FindChild("Collider1").GetComponent<BoxCollider>().size.y * GameSettings.SNAP_VALUE);
+                   (Alternatives[0].transform.FindChild("Collider1").GetComponent<BoxCollider>().size.y * GameSettings.SNAP_VALUE) + INDICATOR_Y_ADJUST;
 
         _indicator.transform.position = newPos;
 

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Animations;
 
 public class AreaCheck : MonoBehaviour
 {
@@ -16,6 +17,12 @@ public class AreaCheck : MonoBehaviour
     private Wand _controller;
     private Transform _wrap;
 
+    private float _currentX, _currentZ;
+    private int _oldCurrentX, _oldCurrentZ;
+
+    public LayerMask VegetationLayer;
+    public List<Transform> FeaturedVegTiles = new List<Transform>();
+    
     void Awake ()
     {
         _wrap = transform.FindChild("Wrap");
@@ -34,11 +41,34 @@ public class AreaCheck : MonoBehaviour
         else
             _curPosition = RightHand.transform.position;
 
-	    var currentX = Mathf.Round(_curPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
-		var currentZ = Mathf.Round(_curPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+	    _currentX = Mathf.Round(_curPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+		_currentZ = Mathf.Round(_curPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
 
-		transform.position = new Vector3(currentX, GameSettings.BUILD_HEIGHT-OffsetY, currentZ);
+		transform.position = new Vector3(_currentX, GameSettings.BUILD_HEIGHT-OffsetY, _currentZ);
+
+        
 	}
+
+    void LateUpdate()
+    {
+        // when moving the preview tiles to another area on the grid
+        if ((int)_currentX != _oldCurrentX || (int)_currentZ != _oldCurrentZ)
+        {
+            // list up vegetation tiles at the current preview tiles positions
+            FeaturedVegTiles.Clear();
+            foreach (Transform child in _wrap)
+            {
+                if (!child.gameObject.name.StartsWith("Preview")) continue;
+                RaycastHit hit;
+                if (Physics.Raycast(child.position + Vector3.down * 80, Vector3.up, out hit, 120, VegetationLayer))
+                {
+                    FeaturedVegTiles.Add(hit.transform);
+                }
+            }
+            _oldCurrentX = (int)_currentX;
+            _oldCurrentZ = (int)_currentZ;
+        }
+    }
 
     public void NewPreviewArea(GameObject currentGameObject)
     {

@@ -22,9 +22,13 @@ public class Wand : MonoBehaviour
 	public bool TouchpadRight = false;
 	public bool TouchpadLeft = false;
 
-	public float TouchpadDetectLimit = 0.0f;
-
+	[Header("Others")]
+	public float TouchpadDeadZone = 0.1f;
 	public bool IsHolding = false;
+
+	public AreaCheck AreaCheck;
+
+	private GameObject _heldObject;
 
 	private SteamVR_Controller.Device Controller { get { return SteamVR_Controller.Input((int)_trackedObj.index); } }
 	private SteamVR_TrackedObject _trackedObj;
@@ -32,7 +36,7 @@ public class Wand : MonoBehaviour
 
 	// Objects entering controller space.
 	private List<GameObject> _objectsWithinReach = new List<GameObject>();
-
+	private List<SpawnThis> _spawnObjectsWithinReach = new List<SpawnThis>();
 
 	void Start()
 	{
@@ -49,16 +53,14 @@ public class Wand : MonoBehaviour
 		// Check to make sure the controller actually connected.
 		if (Controller == null)
 		{
-            // TODO: UNDO
-			//Debug.Log("Controller not initialized");
+			Debug.Log("Controller not initialized");
 			return;
 		}
 
 		CheckTouchpadStates();
 		CheckButtonStates();
 
-		CheckIfCanGrabObject();
-		//TODO: Consider moving the building movement handling to here.
+		HandleControls ();
 	}
 
 	// Adds objects to the list of interactable ones
@@ -67,10 +69,17 @@ public class Wand : MonoBehaviour
 	{
 		// Ensures that the object can be moved and that
 		// it doesnt add any duplicates to the list.
-		if (other.GetComponent<MoveObject>() != null &&
+		if (RecursiveSearch<MoveObject>(other.gameObject) != null &&
 			!_objectsWithinReach.Contains(other.gameObject))
 		{
 			_objectsWithinReach.Add(other.gameObject);
+		}
+
+		var spawnScript = other.transform.parent.GetComponent<SpawnThis> ();
+		if (spawnScript != null &&
+			!_spawnObjectsWithinReach.Contains(spawnScript))
+		{
+			_spawnObjectsWithinReach.Add(spawnScript);
 		}
 	}
 
@@ -83,6 +92,13 @@ public class Wand : MonoBehaviour
 		{
 			_objectsWithinReach.Remove(other.gameObject);
 		}
+
+		var spawnScript = other.transform.parent.GetComponent<SpawnThis> ();
+		if (spawnScript != null &&
+			_spawnObjectsWithinReach.Contains(spawnScript))
+		{
+			_spawnObjectsWithinReach.Remove(spawnScript);
+		}
 	}
 
 	// Handler for the touchpad states.
@@ -91,10 +107,10 @@ public class Wand : MonoBehaviour
 		if (_device.GetPress(SteamVR_Controller.ButtonMask.Touchpad))
 		{
 			Vector2 touchpad = (_device.GetAxis());
-			TouchpadUp = touchpad.y > TouchpadDetectLimit;
-			TouchpadDown = touchpad.y < -TouchpadDetectLimit;
-			TouchpadRight = touchpad.x > TouchpadDetectLimit;
-			TouchpadLeft = touchpad.x < -TouchpadDetectLimit;
+			TouchpadUp = touchpad.y > TouchpadDeadZone;
+			TouchpadDown = touchpad.y < -TouchpadDeadZone;
+			TouchpadRight = touchpad.x > TouchpadDeadZone;
+			TouchpadLeft = touchpad.x < -TouchpadDeadZone;
 		}
 
 		// This prevents the bool from staying true all the time,
@@ -109,6 +125,7 @@ public class Wand : MonoBehaviour
 	}
 
 	// Sets the bool for the buttons on your controller.
+	// NOTE: Optimally the script would get these states directly on need, rather than saving them as bools like this.
 	void CheckButtonStates()
 	{
 		GripButtonDown = Controller.GetPressDown(gripButton);
@@ -120,14 +137,106 @@ public class Wand : MonoBehaviour
 		TriggerButtonPressed = Controller.GetPress(triggerButton);
 	}
 
-	void CheckIfCanGrabObject()
+	// Checks the controllers states.
+	void HandleControls()
 	{
-		// Only grab object while holding over it, and then pressing down the trigger.
-		if (!IsHolding && TriggerButtonDown && _objectsWithinReach.Count > 0)
+		if(Controller.GetPressDown (triggerButton)) OnTriggerDown();
+
+		if(Controller.GetPressUp (triggerButton)) OnTriggerUp();
+
+		if (Controller.GetPressDown (SteamVR_Controller.ButtonMask.Touchpad)) OnTouchPadPress ();
+	}
+
+	// Handler for when the user presses the trigger down.
+	void OnTriggerDown()
+	{
+		if (IsHolding)
+			return;
+		// If the user is hovering over the preview tiles.
+		if (_spawnObjectsWithinReach.Count > 0)
 		{
-			IsHolding = true;
-			_objectsWithinReach[0].transform.parent = transform;
-			_objectsWithinReach [0].GetComponent<MoveObject> ().WarnObjectItsHeld (this);
+			var spawnObj = _spawnObjectsWithinReach [0].SpawnMyObject (this);
+			Grab (spawnObj);
+			return;
 		}
+		// If the user is hovering over any moveable object.
+		if (_objectsWithinReach.Count > 0)
+		{
+			Grab (_objectsWithinReach [0]);
+		}
+	}
+
+	// Handler for when user lifts the trigger.
+	void OnTriggerUp()
+	{
+		if (!IsHolding)
+			return;
+		Drop ();
+	}
+
+	// Handler for touchpad presses.
+	void OnTouchPadPress()
+	{
+		var axis = (_device.GetAxis());
+		if(axis.x < -TouchpadDeadZone){
+			Rotate (DirectionLR.Left);
+		}
+		else if (axis.x > TouchpadDeadZone){
+			Rotate (DirectionLR.Right);
+		}
+	}
+
+	// Handler for when a user rotates an object.
+	void Rotate(DirectionLR dir){
+		if (!IsHolding)
+			return;
+		var heldScript = RecursiveSearch<DragAndPlace> (_heldObject);
+		if (!heldScript)
+			return;
+		heldScript.Rotate (dir);
+	}
+
+	// Handler for when the user grabs an object.
+	void Grab(GameObject grabObject){
+		if (RecursiveSearch<MoveObject>(grabObject) == null)
+			return;
+
+		RecursiveSearch<MoveObject>(grabObject).GrabMe(this);
+
+		_heldObject = grabObject;
+		IsHolding = true;
+	}
+
+	// Handler for when the user drops an object.
+	public void Drop()
+	{
+		if (!RecursiveSearch<MoveObject>(_heldObject).DropMe (this)) return;
+		
+		_heldObject = null;
+		IsHolding = false;
+		CleanLists ();
+	}
+
+	// Iterates through all parent objects until the requested script <T> is found, or no parent is left.
+	T RecursiveSearch<T>(GameObject objectIn){
+		var obj = objectIn;
+		while(obj != null){
+			if (obj.GetComponent<T>() != null)
+			{
+				return obj.GetComponent<T>();
+			}
+			if (obj.transform.parent) {
+				obj = obj.transform.parent.gameObject;
+			} else {
+				break;
+			}
+		}
+		return default(T);
+	}
+
+	// Empties the list to avoid lingering functions.
+	private void CleanLists(){
+		_spawnObjectsWithinReach.Clear ();
+		_objectsWithinReach.Clear ();
 	}
 }

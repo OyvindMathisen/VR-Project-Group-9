@@ -11,30 +11,26 @@ public class BuildingPreviewSelector : MoveObject
 	private bool _hasChanged;
 	
 	// Update is called once per frame
-	override protected void Update ()
+	void Update ()
 	{
-		base.Update ();
-
-		if (RightHolding)
-			RightControllerCheck();
-
-		if (LeftHolding)
-			LeftControllerCheck();
+		if (!Holder)
+			return;
+		ControllerCheck ();
 	}
 
 	// Checks for input from right controller, and resets category changing if needed.
-	private void RightControllerCheck()
+	private void ControllerCheck()
 	{
 		// TODO: Consider changing this for a swipe.
 		// Also, needs to be more visible to the player they can
 		// indeed change category this way.
-		if (ControllerScriptRight.TouchpadUp && !_hasChanged)
+		if (Holder.TouchpadUp && !_hasChanged)
 		{
 			_categoryPosition++;
 			SetActiveCategory();
 		}
 
-		if (ControllerScriptRight.TouchpadDown && !_hasChanged)
+		if (Holder.TouchpadDown && !_hasChanged)
 		{
 			_categoryPosition--;
 			SetActiveCategory();
@@ -42,27 +38,8 @@ public class BuildingPreviewSelector : MoveObject
 
 		// Allow the user to scroll through the list again
 		// after releasing the touchpad button.
-		if (!ControllerScriptRight.TouchpadUp &&
-			!ControllerScriptRight.TouchpadDown)
-			_hasChanged = false;
-	}
-
-	private void LeftControllerCheck()
-	{
-		if (ControllerScriptLeft.TouchpadUp && !_hasChanged)
-		{
-			_categoryPosition++;
-			SetActiveCategory();
-		}
-
-		if (ControllerScriptLeft.TouchpadDown && !_hasChanged)
-		{
-			_categoryPosition--;
-			SetActiveCategory();
-		}
-
-		if (!ControllerScriptLeft.TouchpadUp &&
-			!ControllerScriptLeft.TouchpadDown)
+		if (!Holder.TouchpadUp &&
+			!Holder.TouchpadDown)
 			_hasChanged = false;
 	}
 
@@ -91,7 +68,5 @@ public class BuildingPreviewSelector : MoveObject
 		// Prevent the user from scrolling through the list
 		// once per frame.
 		_hasChanged = true;
-
-		Debug.Log ("_categoryPosition: " + _categoryPosition);
 	}
 }

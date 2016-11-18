@@ -3,18 +3,11 @@
 public class SpawnThis : MonoBehaviour
 {
 	public GameObject ObjectToSpawn;
-	private Wand _controller;
 
-	void Start ()
-    {
-		_controller = HMDComponents.getRightWand();
-	}
-
-	void OnTriggerStay(Collider other)
-	{
-	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown) return;
-
-		Instantiate (ObjectToSpawn, _controller.transform.position, Quaternion.identity);
-	    _controller.IsHolding = true;
+	// Spawns and returns the object.
+	public GameObject SpawnMyObject(Wand controller){
+		var spawnedObject = Instantiate (ObjectToSpawn, controller.transform.position, Quaternion.identity) as GameObject;
+		controller.IsHolding = true;
+		return spawnedObject;
 	}
 }

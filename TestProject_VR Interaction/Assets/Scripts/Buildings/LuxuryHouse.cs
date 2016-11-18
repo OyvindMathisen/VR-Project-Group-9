@@ -49,7 +49,7 @@ public class LuxuryHouse : MonoBehaviour {
                 RaycastHit hit;
                 if (Physics.Raycast(transform.position + transform.right * _xSize * xPos[i] + new Vector3(0, 100, 0) + transform.forward * _zSize * zPos[i], Vector3.down, out hit, 100, _tiles))
                 {
-                    if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Placed) continue;
+                    if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Dropped) continue;
 
                     if (hit.transform.name.StartsWith("House") && i < 4)
                     {

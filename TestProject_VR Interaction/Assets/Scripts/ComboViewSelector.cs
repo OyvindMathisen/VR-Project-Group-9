@@ -9,27 +9,23 @@ public class ComboViewSelector : MoveObject {
 	private bool _hasChanged;
 	
 	// Update is called once per frame
-	override protected void Update ()
+	void Update ()
 	{
-		base.Update ();
-
-		if (RightHolding)
-			RightControllerCheck();
-
-		if (LeftHolding)
-			LeftControllerCheck();
+		if (!Holder)
+			return;
+		ControllerCheck ();
 	}
 
 	// Checks for input from right controller, and resets category changing if needed.
-	private void RightControllerCheck()
+	private void ControllerCheck()
 	{
-		if (ControllerScriptRight.TouchpadRight && !_hasChanged)
+		if (Holder.TouchpadRight && !_hasChanged)
 		{
 			_comboNumber++;
 			SetActiveComboInstruction();
 		}
 
-		if (ControllerScriptRight.TouchpadLeft && !_hasChanged)
+		if (Holder.TouchpadLeft && !_hasChanged)
 		{
 			_comboNumber--;
 			SetActiveComboInstruction();
@@ -37,27 +33,8 @@ public class ComboViewSelector : MoveObject {
 
 		// Allow the user to scroll through the list again
 		// after releasing the touchpad button.
-		if (!ControllerScriptRight.TouchpadRight &&
-			!ControllerScriptRight.TouchpadLeft)
-			_hasChanged = false;
-	}
-
-	private void LeftControllerCheck()
-	{
-		if (ControllerScriptLeft.TouchpadRight && !_hasChanged)
-		{
-			_comboNumber++;
-			SetActiveComboInstruction();
-		}
-
-		if (ControllerScriptLeft.TouchpadLeft && !_hasChanged)
-		{
-			_comboNumber--;
-			SetActiveComboInstruction();
-		}
-
-		if (!ControllerScriptLeft.TouchpadRight &&
-			!ControllerScriptLeft.TouchpadLeft)
+		if (!Holder.TouchpadRight &&
+			!Holder.TouchpadLeft)
 			_hasChanged = false;
 	}
 

@@ -5,6 +5,12 @@ public class ChangePlayerSize : MonoBehaviour
 {
 	public GameObject CameraRig;
 
+	public Vector3 NormalPlayerSize = new Vector3(100.0f, 100.0f, 100.0f);
+	public Vector3 ShrunkenPlayerSize = new Vector3(0.55f, 0.55f, 0.55f);
+
+	public Vector3 NormalPlayerSizePosition = new Vector3(0.0f, 0.0f, 0.0f);
+	public Vector3 ShrunkenPlayerSizePositon = new Vector3(0.0f, 101.0f, 5.5f);
+
     private GameObject _leftController;
 	private Wand _lefthand;
 	private bool _isShrunk;
@@ -22,15 +28,15 @@ public class ChangePlayerSize : MonoBehaviour
 
 	    if (_isShrunk)
 	    {
-	        CameraRig.transform.localScale = new Vector3(100.0f, 100.0f, 100.0f);
-	        CameraRig.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+			CameraRig.transform.localScale = NormalPlayerSize;
+			CameraRig.transform.position = NormalPlayerSizePosition;
 			
 	        _isShrunk = false;
 	    }
 	    else
 	    {
-	        CameraRig.transform.localScale = new Vector3(0.55f, 0.55f, 0.55f);
-	        CameraRig.transform.position = new Vector3(0.0f, 101.0f, 5.5f);
+			CameraRig.transform.localScale = ShrunkenPlayerSize;
+			CameraRig.transform.position = ShrunkenPlayerSizePositon;
 
 	        _isShrunk = true;
 	    }

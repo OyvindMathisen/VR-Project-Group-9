@@ -6,12 +6,11 @@ using UnityEditor.Animations;
 
 public class AreaCheck : MonoBehaviour
 {
-    public GameObject RightHand;
-    public LayerMask Tiles;
-    public GameObject Preview;
+	public GameObject OurHand, Preview;
     public int PreviewCount; // not used atm
     public Vector3 DistanceToPreviewPlacement;
     public Transform HeldObject;
+
 	private Vector3 _curPosition;
     private const float OffsetY = -4;
     private Wand _controller;
@@ -20,7 +19,9 @@ public class AreaCheck : MonoBehaviour
     private float _currentX, _currentZ;
     private int _oldCurrentX, _oldCurrentZ;
 
-    public LayerMask VegetationLayer;
+	public LayerMask VegetationLayer;
+	public LayerMask Tiles;
+
     public List<Transform> FeaturedVegTiles = new List<Transform>();
     
     void Awake ()
@@ -31,7 +32,8 @@ public class AreaCheck : MonoBehaviour
 
 	void Start ()
 	{
-		_controller = HMDComponents.getRightWand();
+		_controller = OurHand.GetComponent<Wand>();
+		_controller.AreaCheck = this;
 	}
 
 	void Update ()
@@ -39,7 +41,7 @@ public class AreaCheck : MonoBehaviour
         if (_controller.IsHolding && HeldObject != null)
             _curPosition = HeldObject.position + DistanceToPreviewPlacement;
         else
-            _curPosition = RightHand.transform.position;
+            _curPosition = OurHand.transform.position;
 
 	    _currentX = Mathf.Round(_curPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
 		_currentZ = Mathf.Round(_curPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
@@ -112,7 +114,7 @@ public class AreaCheck : MonoBehaviour
                 RaycastHit hit;
                 if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, Mathf.Infinity, Tiles) &&
                     hit.collider.tag == "Tile" &&
-                    hit.transform.GetComponent<DragAndPlace>().Placed)
+                    hit.transform.GetComponent<DragAndPlace>().Dropped)
                     return false;
             }
         }

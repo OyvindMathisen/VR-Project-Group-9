@@ -17,7 +17,7 @@ public class TrashcanScript : MonoBehaviour
 			return;
 		}
 
-        if (!script.Placed || script.ReachedHeight) return; // Only delete objects currently falling.
+		if (!script.Dropped || script.ReachedHeight) return; // Only delete objects currently falling.
 		Destroy(parent);
     }
 	

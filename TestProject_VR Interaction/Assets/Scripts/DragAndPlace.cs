@@ -2,20 +2,23 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class DragAndPlace : MonoBehaviour
+[RequireComponent(typeof(BuildingKeepRotation))]
+public class DragAndPlace : MoveObject
 {
-    public bool Placed; // if the tile is still "dragged" around (the mouse button is not released yet)
+    public bool Dropped; // if the tile is still "dragged" around (the mouse button is not released yet)
     public LayerMask Tiles;
     public float BuildingFallSpeed = 1.5f;
 	public bool ReachedHeight;
 
     private GameObject _previewPlacement;
-    private Wand _controller;
     private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong;
     private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
-    private AreaCheck _areaCheck;
     private Quaternion _lastSafeRot;
     private Combiner _combiner;
+
+	private AreaCheck _areaCheck;
+
+	private BuildingKeepRotation _buildingRotation;
 
     private List<GameObject> _connectedColliders = new List<GameObject>();
     private List<GameObject> _markedColliders = new List<GameObject>();
@@ -25,37 +28,39 @@ public class DragAndPlace : MonoBehaviour
     void Awake()
 	{
         _previewPlacement = GameObject.FindWithTag("PreviewPlacement");
-        _areaCheck = _previewPlacement.GetComponent<AreaCheck>();
 	    _lastSafePos = Vector3.zero;
 
         _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
 
-        _vegetation = _areaCheck.VegetationLayer;
+        //_vegetation = Holder.AreaCheck.VegetationLayer;
 
         transform.parent = GameObject.Find("Tiles").transform;
 
         // if placed is true to begin with, it's probably a combined building
-        if (!Placed) return;
+        if (!Dropped) return;
 		ReachedHeight = true;
         _oncePlaced = true;
 	}
 
-	void Start()
+	protected  void Start()
 	{
-		_controller = HMDComponents.getRightWand();
+		//base.Start ();
+		//_controller = HMDComponents.getRightWand();
+		_buildingRotation = GetComponent<BuildingKeepRotation> ();
+		//_distToHand = transform.position - _controller.transform.position;
 
-		_distToHand = transform.position - _controller.transform.position;
-		if (!Placed)
-		_areaCheck.NewPreviewArea(gameObject);
-        _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
+		if (!Dropped){
+			_areaCheck.NewPreviewArea (gameObject);
+			_areaCheck.DistanceToPreviewPlacement = Holder.AreaCheck.transform.position - transform.position;
+		}
     }
 
 	void Update()
 	{
         // If the building has yet to be placed.
-		if (!Placed)
+		if (!Dropped)
 		{
-            _areaCheck.HeldObject = transform;
+            Holder.AreaCheck.HeldObject = transform; // TODO: Null reference
 
 		    if (!_onceNotPlaced)
 		    {
@@ -71,140 +76,25 @@ public class DragAndPlace : MonoBehaviour
                 _onceNotPlaced = true;
 		    }
 
-            // Collision check to prevent overlapping buildings
-            if (_controller.TriggerButtonUp)
-            {
-                Placed = true;
-                _controller.IsHolding = false;
-
-                // to prevent raycasting self when checking for free area
-                foreach (var c in GetComponentsInChildren<Collider>())
-                {
-                    c.enabled = false;
-                }
-
-                if (!_areaCheck.IsAreaFree())
-                {
-                    if (_lastSafePos != Vector3.zero)
-                    {
-                        transform.rotation = _lastSafeRot;
-                        transform.position = _lastSafePos;
-                    }
-                    else
-                    {
-                        Destroy(gameObject);
-                    }
-                    _placedWrong = true;
-                    _previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
-                    return;
-                }
-            }
-
-			// Rotate handler, right direction
-			if (_controller.TouchpadRight && !_hasRotated)
-			{
-                /* // Force rotation around the center of the controller.
-                transform.position = Rhand.transform.position;
-                areaCheck.transform.position = transform.position;
-                distToHand = transform.position - Rhand.transform.position;
-                _areaCheck.distanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
-                //*/
-                var sfx = _previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
-                sfx.pitch = 1.1f;
-                sfx.Play();
-
-                transform.Rotate(0, 90, 0);
-				_hasRotated = true;
-
-				_previewPlacement.transform.FindChild("Wrap").Rotate(0, 90, 0);
-			}
-
-			// Rotate handler, left direction
-			if (_controller.TouchpadLeft && !_hasRotated)
-			{
-                /* // Force rotation around the center of the controller.
-                transform.position = Rhand.transform.position;
-                areaCheck.transform.position = transform.position;
-                distToHand = transform.position - Rhand.transform.position;
-                _areaCheck.distanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
-                //*/
-                var sfx = _previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
-                sfx.pitch = 0.9f;
-                sfx.Play();
-
-                transform.Rotate(0, -90, 0);
-				_hasRotated = true;
-
-				_previewPlacement.transform.FindChild("Wrap").Rotate(0, -90, 0);
-			}
 
 			// Delete the building in hand
-			if (_controller.GripButtonDown)
+			if (Holder && Holder.GripButtonDown)
 			{
-                var sfx = _previewPlacement.transform.FindChild("sfxDestroy").GetComponent<AudioSource>();
-                sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
-                sfx.Play();
+				var sfx = _previewPlacement.transform.FindChild("sfxDestroy").GetComponent<AudioSource>();
+				sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
+				sfx.Play();
 
-                _controller.IsHolding = false;
-				_areaCheck.DeletePreviews();
+				Holder.IsHolding = false;
+				Holder.AreaCheck.DeletePreviews();
 				Destroy(gameObject);
 			}
-
-			// To prevent the building from rotating at the speed of light
-			if (!_controller.TouchpadLeft && !_controller.TouchpadRight)
-			{
-				_hasRotated = false;
-			}
-
-            // Forces the building to follow RightController.
-			var curPosition = _controller.transform.position + _distToHand;
-			var newPosition = Vector3.zero;
-            newPosition.x = Mathf.Lerp(transform.position.x, curPosition.x, 0.15f);
-            newPosition.y = Mathf.Lerp(transform.position.y, curPosition.y, 0.15f);
-		    newPosition.y = Mathf.Clamp(newPosition.y, GameSettings.BUILD_HEIGHT, 200f); // ground limiter
-            newPosition.z = Mathf.Lerp(transform.position.z, curPosition.z, 0.15f);
-            transform.position = newPosition;
         }
         // If the building has been placed.
 		else
 		{
-            
             if (!_oncePlaced)
             {
-                // hide vegetation at the building area
-                foreach (Transform tile in _areaCheck.FeaturedVegTiles)
-                {
-                    var script = tile.transform.GetComponent<Vegetation>();
-                    if (!script) continue;
-                    script.Hide();
-                }
-
-                // Delete old previews lingering on the map
-                _areaCheck.DeletePreviews();
-
-                // to prevent raycasting self when checking for free area
-                foreach (var c in GetComponentsInChildren<Collider>())
-                {
-                    c.enabled = true;
-                }
-
-                if (_placedWrong)
-                {
-					ReachedHeight = true;
-                    _placedWrong = false;
-                }
-                else
-                {
-                    // set building position
-                    var snappedPosition = transform.position;
-                    snappedPosition.x = Mathf.Round(snappedPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
-                    snappedPosition.z = Mathf.Round(snappedPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
-                    snappedPosition.y = transform.position.y;
-                    transform.position = snappedPosition;
-                }
-
-                _onceNotPlaced = false;
-                _oncePlaced = true;
+				Place ();
             }
 		    
 		    // while the building is not at specified height
@@ -243,6 +133,61 @@ public class DragAndPlace : MonoBehaviour
 		    ReachedHeight = true;
 		}
     }
+
+	void Place()
+	{
+		// hide vegetation at the building area
+		foreach (Transform tile in _areaCheck.FeaturedVegTiles)
+		{
+			var script = tile.transform.GetComponent<Vegetation>();
+			if (!script) continue;
+			script.Hide();
+		}
+
+		// Delete old previews lingering on the map
+		_areaCheck.DeletePreviews();
+
+		// to prevent raycasting self when checking for free area
+		foreach (var c in GetComponentsInChildren<Collider>())
+		{
+			c.enabled = true;
+		}
+
+		if (_placedWrong)
+		{
+			ReachedHeight = true;
+			_placedWrong = false;
+		}
+		else
+		{
+			// set building position
+			var snappedPosition = transform.position;
+			snappedPosition.x = Mathf.Round(snappedPosition.x * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+			snappedPosition.z = Mathf.Round(snappedPosition.z * GameSettings.SNAP_INVERSE) / GameSettings.SNAP_INVERSE;
+			snappedPosition.y = transform.position.y;
+			transform.position = snappedPosition;
+		}
+
+		_onceNotPlaced = false;
+		_oncePlaced = true;
+	}
+
+	public void Rotate(DirectionLR direction){
+		var sfx = _previewPlacement.transform.FindChild("sfxRotate").GetComponent<AudioSource>();
+
+		_buildingRotation.RotateBuilding(direction);
+		_hasRotated = true;
+
+		if (direction == DirectionLR.Right) {
+			_previewPlacement.transform.FindChild ("Wrap").Rotate (0, 90, 0);
+			sfx.pitch = 1.1f;
+		} else {
+			_previewPlacement.transform.FindChild ("Wrap").Rotate (0, -90, 0);
+			sfx.pitch = 0.9f;
+		}
+
+		sfx.Play();
+	}
 
     void CheckConnectedTilesForCombo()
     {
@@ -286,7 +231,7 @@ public class DragAndPlace : MonoBehaviour
                 if (hit.collider.tag != "Tile") continue;
                 var script = hit.transform.GetComponent<DragAndPlace>();
                 if (!script) continue; // If script is null.
-                if (!script.Placed) continue;
+                if (!script.Dropped) continue;
                 if (_markedColliders.Contains(hit.collider.gameObject)) continue;
 
                 gameObjects.Add(hit.collider.gameObject);
@@ -300,12 +245,45 @@ public class DragAndPlace : MonoBehaviour
         _connectedColliders.AddRange(gameObjects);
     }
 
-    void OnTriggerStay(Collider other)
+	public override void GrabMe(Wand controller){
+		base.GrabMe(controller);
+		OnGrab ();
+	}
+
+	public override bool DropMe(Wand controller){
+		if (controller != Holder)
+			return false;
+		Dropped = true;
+
+		// to prevent raycasting self when checking for free area
+		foreach (var c in GetComponentsInChildren<Collider>())
+		{
+			c.enabled = false;
+		}
+
+		if (!_areaCheck.IsAreaFree())
+		{
+			if (_lastSafePos != Vector3.zero)
+			{
+				transform.rotation = _lastSafeRot;
+				transform.position = _lastSafePos;
+			}
+			else
+			{
+				Destroy(gameObject);
+			}
+			_placedWrong = true;
+			_previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
+		}
+		return base.DropMe(controller);
+	}
+
+    public void OnGrab()
 	{
-	    if (other.tag != "Rhand" || !_controller.TriggerButtonDown || _controller.IsHolding) return;
-        _areaCheck.NewPreviewArea(gameObject);
-        _areaCheck.DistanceToPreviewPlacement = _areaCheck.transform.position - transform.position;
-        _distToHand = transform.position - _controller.transform.position;
+		_areaCheck = Holder.AreaCheck;
+        Holder.AreaCheck.NewPreviewArea(gameObject);
+        Holder.AreaCheck.DistanceToPreviewPlacement = Holder.AreaCheck.transform.position - transform.position;
+		//_distToHand = transform.position - CurrentController.transform.position;
 
         // start fade-in on vegetation where the building has been
         foreach (Transform child in transform)
@@ -318,14 +296,14 @@ public class DragAndPlace : MonoBehaviour
             if (!script) continue;
             script.Show();
         }
-
-        if (Placed)
+		/*/Not sure if important
+        if (Dropped)
 	    {
             _lastSafePos = transform.position;
 	        _lastSafeRot = transform.rotation;
-	    }
+			CurrentController = null;
+	    }//*/
 
-	    Placed = false;
-	    _controller.IsHolding = true;
+	    Dropped = false;
 	}
 }

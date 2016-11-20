@@ -16,11 +16,13 @@ public class MoveObject : MonoBehaviour
 
 	public virtual void GrabMe(Wand controller)
 	{
-		if (Holder)
+		if (Holder) // Checks if there is any controller actually holding it.
 		{
+			// Resets the tile state if not.
 			Holder.AreaCheck.DeletePreviews();
 			Holder.Drop();
 		}
+		// Sets the controllers parent into the controller that grabbed it.
 		Holder = controller;
 		transform.parent = controller.transform;
 	}

@@ -8,21 +8,27 @@ public class BuildingKeepRotation : MonoBehaviour
 	private DragAndPlace _buildingMovementScript;
 
 	// Get the required scrips from the building.
-	void Start () {
-		_buildingMovementScript = GetComponent<DragAndPlace> ();
+	void Start()
+	{
+		_buildingMovementScript = GetComponent<DragAndPlace>();
 	}
 
-	void Update ()
+	void Update()
 	{
-		if (_buildingMovementScript.Dropped) return;
-		transform.rotation = Quaternion.Euler (Vector3.up * yRotation);
+		// Prevents the building from following the controllers exact rotation.
+		// TODO: Improve to avoid the building wobbling around in the hand if shaken roughly.
+		if (_buildingMovementScript.Dropped) return; // Does not run if the building has been placed.
+		transform.rotation = Quaternion.Euler(Vector3.up * yRotation);
 	}
 
 	public void RotateBuilding(DirectionLR Direction)
 	{
-		if (Direction == DirectionLR.Right) {
+		if (Direction == DirectionLR.Right)
+		{
 			yRotation += 90;
-		} else {
+		}
+		else
+		{
 			yRotation -= 90;
 		}
 

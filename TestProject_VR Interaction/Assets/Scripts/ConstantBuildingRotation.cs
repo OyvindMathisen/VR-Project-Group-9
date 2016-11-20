@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class ConstantBuildingRotation : MonoBehaviour
 {
@@ -11,6 +10,6 @@ public class ConstantBuildingRotation : MonoBehaviour
 
 	void FixedUpdate()
 	{
-		transform.Rotate (xRotation, yRotation, zRotation);
+		transform.Rotate(xRotation, yRotation, zRotation);
 	}
 }

@@ -1,21 +1,19 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 public class BuildingPreviewSelector : MoveObject
 {
 	[Header("Building Categories")]
-	public List<GameObject> _categories;
+	public List<GameObject> Categories;
 
 	private int _categoryPosition = 0;
 	private bool _hasChanged;
-	
+
 	// Update is called once per frame
-	void Update ()
+	void Update()
 	{
-		if (!Holder)
-			return;
-		ControllerCheck ();
+		if (!Holder) return;
+		ControllerCheck();
 	}
 
 	// Checks for input from right controller, and resets category changing if needed.
@@ -48,22 +46,22 @@ public class BuildingPreviewSelector : MoveObject
 	{
 		if (_categoryPosition < 0)
 		{
-			_categoryPosition = _categories.Count-1;
+			_categoryPosition = Categories.Count - 1;
 		}
 
-		if (_categoryPosition > _categories.Count-1)
+		if (_categoryPosition > Categories.Count - 1)
 		{
 			_categoryPosition = 0;
 		}
 
 		// Unload all the categories
-		foreach (GameObject obj in _categories)
+		foreach (GameObject obj in Categories)
 		{
-			obj.gameObject.SetActive (false);
+			obj.gameObject.SetActive(false);
 		}
 
 		// Load the new category
-		_categories [_categoryPosition].SetActive (true);
+		Categories[_categoryPosition].SetActive(true);
 
 		// Prevent the user from scrolling through the list
 		// once per frame.

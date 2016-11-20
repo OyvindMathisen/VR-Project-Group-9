@@ -60,7 +60,7 @@ public class Wand : MonoBehaviour
 		CheckTouchpadStates();
 		CheckButtonStates();
 
-		HandleControls ();
+		HandleControls();
 	}
 
 	// Adds objects to the list of interactable ones
@@ -75,7 +75,7 @@ public class Wand : MonoBehaviour
 			_objectsWithinReach.Add(other.gameObject);
 		}
 
-		var spawnScript = other.transform.parent.GetComponent<SpawnThis> ();
+		var spawnScript = other.transform.parent.GetComponent<SpawnThis>();
 		if (spawnScript != null &&
 			!_spawnObjectsWithinReach.Contains(spawnScript))
 		{
@@ -93,7 +93,7 @@ public class Wand : MonoBehaviour
 			_objectsWithinReach.Remove(other.gameObject);
 		}
 
-		var spawnScript = other.transform.parent.GetComponent<SpawnThis> ();
+		var spawnScript = other.transform.parent.GetComponent<SpawnThis>();
 		if (spawnScript != null &&
 			_spawnObjectsWithinReach.Contains(spawnScript))
 		{
@@ -140,67 +140,68 @@ public class Wand : MonoBehaviour
 	// Checks the controllers states.
 	void HandleControls()
 	{
-		if(Controller.GetPressDown (triggerButton)) OnTriggerDown();
+		if (Controller.GetPressDown(triggerButton)) OnTriggerDown();
 
-		if(Controller.GetPressUp (triggerButton)) OnTriggerUp();
+		if (Controller.GetPressUp(triggerButton)) OnTriggerUp();
 
-		if (Controller.GetPressDown (SteamVR_Controller.ButtonMask.Touchpad)) OnTouchPadPress ();
+		if (Controller.GetPressDown(SteamVR_Controller.ButtonMask.Touchpad)) OnTouchPadPress();
 	}
 
 	// Handler for when the user presses the trigger down.
 	void OnTriggerDown()
 	{
-		if (IsHolding)
-			return;
+		if (IsHolding) return;
 		// If the user is hovering over the preview tiles.
 		if (_spawnObjectsWithinReach.Count > 0)
 		{
-			var spawnObj = _spawnObjectsWithinReach [0].SpawnMyObject (this);
-			Grab (spawnObj);
-			return;
+			var spawnObj = _spawnObjectsWithinReach[0].SpawnMyObject(this);
+			Grab(spawnObj); return;
 		}
 		// If the user is hovering over any moveable object.
 		if (_objectsWithinReach.Count > 0)
 		{
-			Grab (_objectsWithinReach [0]);
+			Grab(_objectsWithinReach[0]);
 		}
 	}
 
 	// Handler for when user lifts the trigger.
 	void OnTriggerUp()
 	{
-		if (!IsHolding)
-			return;
-		Drop ();
+		if (!IsHolding) return;
+		Drop();
 	}
 
 	// Handler for touchpad presses.
 	void OnTouchPadPress()
 	{
+		// Checks where the player pressed on the touchpad.
 		var axis = (_device.GetAxis());
-		if(axis.x < -TouchpadDeadZone){
-			Rotate (DirectionLR.Left);
+		if (axis.x < -TouchpadDeadZone) // User pressed left
+		{
+			Rotate(DirectionLR.Left);
 		}
-		else if (axis.x > TouchpadDeadZone){
-			Rotate (DirectionLR.Right);
+		else if (axis.x > TouchpadDeadZone) // User pressed right
+		{
+			Rotate(DirectionLR.Right);
 		}
 	}
 
 	// Handler for when a user rotates an object.
-	void Rotate(DirectionLR dir){
-		if (!IsHolding)
-			return;
-		var heldScript = RecursiveSearch<DragAndPlace> (_heldObject);
-		if (!heldScript)
-			return;
-		heldScript.Rotate (dir);
+	void Rotate(DirectionLR dir)
+	{
+		if (!IsHolding) return; // Makes sure the object is only turned if its held.
+		var heldScript = RecursiveSearch<DragAndPlace>(_heldObject); // Gets the script for the object.
+		if (!heldScript) return; // Null check to avoid a NullRef.
+		heldScript.Rotate(dir);
 	}
 
 	// Handler for when the user grabs an object.
-	void Grab(GameObject grabObject){
-		if (RecursiveSearch<MoveObject>(grabObject) == null)
-			return;
+	void Grab(GameObject grabObject)
+	{
+		// Check if the object, or any of its parents contains the script.
+		if (RecursiveSearch<MoveObject>(grabObject) == null) return;
 
+		// Tells the object the wand that is holding the object.
 		RecursiveSearch<MoveObject>(grabObject).GrabMe(this);
 
 		_heldObject = grabObject;
@@ -210,33 +211,40 @@ public class Wand : MonoBehaviour
 	// Handler for when the user drops an object.
 	public void Drop()
 	{
-		if (!RecursiveSearch<MoveObject>(_heldObject).DropMe (this)) return;
-		
+		// Check if the requested object has the script (Done in RecursiveSearch), and makes it drop the item.
+		if (!RecursiveSearch<MoveObject>(_heldObject).DropMe(this)) return;
+
 		_heldObject = null;
 		IsHolding = false;
-		CleanLists ();
+		CleanLists();
 	}
 
 	// Iterates through all parent objects until the requested script <T> is found, or no parent is left.
-	T RecursiveSearch<T>(GameObject objectIn){
+	T RecursiveSearch<T>(GameObject objectIn)
+	{
 		var obj = objectIn;
-		while(obj != null){
-			if (obj.GetComponent<T>() != null)
+		while (obj != null)
+		{
+			if (obj.GetComponent<T>() != null) // If the object has the script...
 			{
-				return obj.GetComponent<T>();
+				return obj.GetComponent<T>(); // ...return the script
 			}
-			if (obj.transform.parent) {
-				obj = obj.transform.parent.gameObject;
-			} else {
+			if (obj.transform.parent) // If there is no script, we check if it has a parent.
+			{
+				obj = obj.transform.parent.gameObject; // And set object to it, and continue the loop.
+			}
+			else // If no parent is found, we break.
+			{
 				break;
 			}
 		}
-		return default(T);
+		return default(T); // Return default, or basicly null.
 	}
 
 	// Empties the list to avoid lingering functions.
-	private void CleanLists(){
-		_spawnObjectsWithinReach.Clear ();
-		_objectsWithinReach.Clear ();
+	private void CleanLists()
+	{
+		_spawnObjectsWithinReach.Clear();
+		_objectsWithinReach.Clear();
 	}
 }

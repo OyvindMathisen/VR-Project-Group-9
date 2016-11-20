@@ -2,36 +2,37 @@
 
 public class HMDComponents : MonoBehaviour
 {
-    public GameObject RightController;
-    public GameObject LeftController;
-    public GameObject HeadCamera;
+	// Get the controllers and the HeadMountedDisplay objects.
+	public GameObject RightController;
+	public GameObject LeftController;
+	public GameObject HeadCamera;
 
-    static private Wand RightWand;
-    static private Wand LeftWand;
+	static private Wand _rightWand;
+	static private Wand _leftWand;
 
-    void Awake()
-    {
-        RightWand = RightController.GetComponent<Wand>();
-        LeftWand = LeftController.GetComponent<Wand>();
-    }
-
-	public static GameObject getRightController()
+	void Awake()
 	{
-		return RightWand.gameObject;
+		_rightWand = RightController.GetComponent<Wand>();
+		_leftWand = LeftController.GetComponent<Wand>();
 	}
 
-	public static GameObject getLeftController()
+	public static GameObject GetRightController()
 	{
-		return LeftWand.gameObject;
+		return _rightWand.gameObject;
 	}
 
-    public static Wand getRightWand()
-    {
-        return RightWand;
-    }
+	public static GameObject GetLeftController()
+	{
+		return _leftWand.gameObject;
+	}
 
-    public static Wand getLeftWand()
-    {
-        return LeftWand;
-    }
+	public static Wand GetRightWand()
+	{
+		return _rightWand;
+	}
+
+	public static Wand GetLeftWand()
+	{
+		return _leftWand;
+	}
 }

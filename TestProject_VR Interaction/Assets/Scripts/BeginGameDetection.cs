@@ -13,7 +13,7 @@ public class BeginGameDetection : MonoBehaviour
 	void Update()
 	{
 		if (_objectsInGameStartArea.Count <= 0) return; // Prevents checking empty list.
-		// Ensures only blocks at the right height can start the game.
+														// Ensures only blocks at the right height can start the game.
 		if (_objectsInGameStartArea[0].GetComponent<DragAndPlace>().ReachedHeight) // Note. This is a getcomponent in an update function. BE CAREFUL.
 		{
 			LaunchGame();
@@ -39,14 +39,18 @@ public class BeginGameDetection : MonoBehaviour
 	// Adds all blocks entering the start-game field into a list.
 	void OnTriggerEnter(Collider other)
 	{
-		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(other.transform.parent.gameObject)) return;
+		var gameObjectWithScript = other.transform.parent.gameObject;
+
+        if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Add(other.transform.parent.gameObject);
 	}
 
 	// Removes them, in case you drag a block away from the start-game field.
 	void OnTriggerExit(Collider other)
 	{
-		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(other.transform.parent.gameObject)) return;
+		var gameObjectWithScript = other.transform.parent.gameObject;
+
+		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Remove(other.transform.parent.gameObject);
 	}
 }

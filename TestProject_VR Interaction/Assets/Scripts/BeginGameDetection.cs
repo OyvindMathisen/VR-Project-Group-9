@@ -22,6 +22,8 @@ public class BeginGameDetection : MonoBehaviour
 
 	void LaunchGame()
 	{
+		// Currently not functioning, since we cannot put the tilelocation transform onto the object.
+		/*
 		// Deletes excess buildings if the player has placed more than minimum.
 		if (TilesLocation.transform.childCount > 0)
 		{
@@ -30,10 +32,13 @@ public class BeginGameDetection : MonoBehaviour
 				Destroy(child.gameObject);
 			}
 		}
+		*/
 
 		// Turns off main menu mode and turns on the game.
 		MainGameObjects.SetActive(true);
 		MainMenuObjects.SetActive(false);
+
+		Destroy(gameObject); // Cleanup of the object after tutorial is done.
 	}
 
 	// Adds all blocks entering the start-game field into a list.
@@ -41,6 +46,7 @@ public class BeginGameDetection : MonoBehaviour
 	{
 		var gameObjectWithScript = other.transform.parent.gameObject;
 
+		// Check why this does not trigger.
         if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Add(other.transform.parent.gameObject);
 	}

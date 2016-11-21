@@ -68,7 +68,11 @@ public class LuxuryHouse : MonoBehaviour
 					}
 					else continue;
 
-					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile)) continue;
+					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile))
+					{
+						_trashCan.Clear();
+						continue;
+					}
 					_combiner.Alternatives.Add(gameObject);
 					_combiner.Names.Add(result.name);
 					_combiner.I.Add(i);
@@ -83,7 +87,7 @@ public class LuxuryHouse : MonoBehaviour
 		else
 		{
 			Instantiate(result, transform.position + transform.right * _xSize * xAdj[I] + transform.forward * _zSize * zAdj[I], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[I], 0));
-			foreach (var obj in _garbageBin[I]) Destroy(obj);
+			_combiner.DeletePredecessors(_garbageBin[I]);
 		}
 	}
 }

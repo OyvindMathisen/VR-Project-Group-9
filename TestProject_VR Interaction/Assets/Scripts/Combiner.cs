@@ -22,6 +22,7 @@ public class Combiner : MonoBehaviour
 	private float _timerWidth;
 	private const float CHAR_WIDTH = 0.6f;
 	private const float INDICATOR_Y_ADJUST = 8f;
+	private List<GameObject> _temporaryDeleteList = new List<GameObject>();
 
 	public bool onceNewAlts;
 
@@ -85,7 +86,7 @@ public class Combiner : MonoBehaviour
 		}
 	}
 
-	private void UpdateUI()
+	public void UpdateUI()
 	{
 		var altCount = Alternatives.Count - 1;
 		var newScale = _wall.localScale;
@@ -205,5 +206,24 @@ public class Combiner : MonoBehaviour
 		var sfx = _previewPlacement.FindChild("sfxCombine").GetComponent<AudioSource>();
 		sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
 		sfx.Play();
+	}
+
+	public void DeletePredecessors(List<GameObject> list)
+	{
+		foreach (var obj in list)
+		{
+			obj.transform.position = new Vector3(-500, -500, -500);
+
+		}
+		_temporaryDeleteList = list;
+		Invoke("DestroyPredecessors", 0.05f);
+	}
+
+	private void DestroyPredecessors()
+	{
+		foreach (var obj in _temporaryDeleteList)
+		{
+			Destroy(obj);
+		}
 	}
 }

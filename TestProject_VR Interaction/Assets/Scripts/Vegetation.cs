@@ -58,7 +58,6 @@ public class Vegetation : MonoBehaviour
 	{
 		CancelInvoke();
 		_fadeBack = false;
-		Debug.Log("hide!");
 		_alpha = 0;
 		SetChildrenShader(false);
 		SetChildrenAlpha(_alpha);
@@ -67,7 +66,6 @@ public class Vegetation : MonoBehaviour
 	public void Show()
 	{
 		CancelInvoke();
-		Debug.Log("show!");
 		Invoke("FadeBack", Random.Range(12f, 24f));
 	}
 

@@ -69,17 +69,17 @@ public class Wand : MonoBehaviour
 	{
 		// Ensures that the object can be moved and that
 		// it doesnt add any duplicates to the list.
-		if (RecursiveSearch<MoveObject>(other.gameObject) != null &&
-			!_objectsWithinReach.Contains(other.gameObject))
-		{
-			_objectsWithinReach.Add(other.gameObject);
-		}
-
 		var spawnScript = other.transform.parent.GetComponent<SpawnThis>();
 		if (spawnScript != null &&
 			!_spawnObjectsWithinReach.Contains(spawnScript))
 		{
 			_spawnObjectsWithinReach.Add(spawnScript);
+		}
+
+		if (RecursiveSearch<MoveObject>(other.gameObject) != null &&
+			!_objectsWithinReach.Contains(other.gameObject))
+		{
+			_objectsWithinReach.Add(other.gameObject);
 		}
 	}
 
@@ -88,16 +88,16 @@ public class Wand : MonoBehaviour
 	void OnTriggerExit(Collider other)
 	{
 		// Makes sure the list has this object before removing it.
-		if (_objectsWithinReach.Contains(other.gameObject))
-		{
-			_objectsWithinReach.Remove(other.gameObject);
-		}
-
 		var spawnScript = other.transform.parent.GetComponent<SpawnThis>();
 		if (spawnScript != null &&
 			_spawnObjectsWithinReach.Contains(spawnScript))
 		{
 			_spawnObjectsWithinReach.Remove(spawnScript);
+		}
+			
+		if (_objectsWithinReach.Contains(other.gameObject))
+		{
+			_objectsWithinReach.Remove(other.gameObject);
 		}
 	}
 
@@ -213,6 +213,12 @@ public class Wand : MonoBehaviour
 	{
 		// Check if the requested object has the script (Done in RecursiveSearch), and makes it drop the item.
 		if (!RecursiveSearch<MoveObject>(_heldObject).DropMe(this)) return;
+
+		var heldScript = RecursiveSearch<DragAndPlace>(_heldObject);
+		if (heldScript) // Null check to avoid a NullRef.
+		{
+			heldScript.FinalRotation();// Prevents the building from being wobbled to the side on release.
+		}
 
 		_heldObject = null;
 		IsHolding = false;

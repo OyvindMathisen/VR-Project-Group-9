@@ -83,9 +83,14 @@ public class Park : MonoBehaviour
 			if (result != Estate)
 			{
 				_garbageBin[I].Add(gameObject);
-				foreach (var obj in _garbageBin[I]) Destroy(obj);
+				_combiner.DeletePredecessors(_garbageBin[I]);
 			}
-			else Destroy(gameObject);
+			else
+			{
+				_garbageBin[I].Clear();
+				_garbageBin[I].Add(gameObject);
+				_combiner.DeletePredecessors(_garbageBin[I]);
+			}
 		}
 	}
 }

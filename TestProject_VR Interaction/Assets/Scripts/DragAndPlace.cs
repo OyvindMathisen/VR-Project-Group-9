@@ -5,12 +5,12 @@ using System.Collections.Generic;
 public class DragAndPlace : MoveObject
 {
 	public bool Dropped; // if the tile is still "dragged" around (the mouse button is not released yet)
-	public LayerMask Tiles;
+	public LayerMask Tiles, VegetationLayer;
 	public float BuildingFallSpeed = 1.5f;
 	public bool ReachedHeight;
 
 	private GameObject _previewPlacement;
-	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong;
+	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced;
 	private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
 	private Quaternion _lastSafeRot;
 	private Combiner _combiner;
@@ -22,8 +22,6 @@ public class DragAndPlace : MoveObject
 	private List<GameObject> _connectedColliders = new List<GameObject>();
 	private List<GameObject> _markedColliders = new List<GameObject>();
 
-	private LayerMask _vegetation; // TODO: This needs to be assigned before it can be used.
-
 	void Awake()
 	{
 		// TODO: Replace these Find's with public variables, dragged into from the editor.
@@ -33,7 +31,7 @@ public class DragAndPlace : MoveObject
 
 		_lastSafePos = Vector3.zero;
 
-		_vegetation = Holder.AreaCheck.VegetationLayer;
+		
 
 		// if placed is true to begin with, it's probably a combined building
 		if (!Dropped) return;
@@ -74,7 +72,7 @@ public class DragAndPlace : MoveObject
 				_onceNotPlaced = true;
 			}
 
-
+			/*
 			// Delete the building in hand
 			if (Holder && Holder.GripButtonDown)
 			{
@@ -86,6 +84,7 @@ public class DragAndPlace : MoveObject
 				Holder.AreaCheck.DeletePreviews();
 				Destroy(gameObject);
 			}
+			*/
 		}
 		// If the building has been placed.
 		else
@@ -110,6 +109,10 @@ public class DragAndPlace : MoveObject
 			}
 			// Preformed when a building lands on the intended height.
 			if (!(transform.position.y > GameSettings.BUILD_HEIGHT - 4f) || !(transform.position.y < GameSettings.BUILD_HEIGHT + 4f) || ReachedHeight) return;
+
+			// BUG: fix overlapping buildings
+			//Invoke("TempName", 0.1f);
+
 			var sfx = _previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
 			sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
 			sfx.Play();
@@ -126,6 +129,14 @@ public class DragAndPlace : MoveObject
 
 			GameSettings.NewestLandedPosition = gameObject.transform.position;
 			_combiner.LastPlacedTile = gameObject;
+
+			if (_combiner.Alternatives.Count > 0)
+			{
+				_combiner.onceNewAlts = false;
+				//_combiner.UpdateUI();
+				_combiner.PlayCancelSound();
+			}
+
 			CheckConnectedTilesForCombo();
 			//transform.parent.BroadcastMessage("CheckForCombos", false);
 			ReachedHeight = true;
@@ -166,8 +177,14 @@ public class DragAndPlace : MoveObject
 			transform.position = snappedPosition;
 		}
 
+		_hasEverBeenPlaced = true;
 		_onceNotPlaced = false;
 		_oncePlaced = true;
+	}
+
+	public void FinalRotation()
+	{
+		_buildingRotation.FinalizeRotation();
 	}
 
 	public void Rotate(DirectionLR direction)
@@ -211,20 +228,7 @@ public class DragAndPlace : MoveObject
 			c.enabled = false;
 		}
 
-		if (!_areaCheck.IsAreaFree())
-		{
-			if (_lastSafePos != Vector3.zero)
-			{
-				transform.rotation = _lastSafeRot;
-				transform.position = _lastSafePos;
-			}
-			else
-			{
-				Destroy(gameObject);
-			}
-			_placedWrong = true;
-			_previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
-		}
+		HandleIsAreaFree();
 		return base.DropMe(controller);
 	}
 
@@ -239,21 +243,15 @@ public class DragAndPlace : MoveObject
 		{
 			if (!child.name.StartsWith("Collider")) continue;
 			RaycastHit hit;
-			if (!Physics.Raycast(child.position + Vector3.down * 20, Vector3.up, out hit, 30, _vegetation)) continue;
+			if (!Physics.Raycast(child.position + Vector3.down * 20, Vector3.up, out hit, 30, VegetationLayer)) continue;
 
 			var script = hit.transform.GetComponent<Vegetation>();
 			if (!script) continue;
 			script.Show();
 		}
 
-		/*/Not sure if important
-        if (Dropped)
-	    {
-            _lastSafePos = transform.position;
-	        _lastSafeRot = transform.rotation;
-			CurrentController = null;
-	    }
-		//*/
+		_lastSafePos = transform.position;
+		_lastSafeRot = transform.rotation;
 
 		Dropped = false;
 	}
@@ -313,4 +311,41 @@ public class DragAndPlace : MoveObject
 
 		_connectedColliders.AddRange(gameObjects);
 	}
+
+	void HandleIsAreaFree(bool alsoCheckArea = true)
+	{
+		if (alsoCheckArea)
+		{
+			if (_areaCheck.IsAreaFree()) return;
+		}
+		if (_hasEverBeenPlaced)
+		{
+			transform.rotation = _lastSafeRot;
+			transform.position = _lastSafePos;
+		}
+		else
+		{
+			_areaCheck.DeletePreviews();
+			Destroy(gameObject);
+		}
+		_placedWrong = true;
+		_previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
+	}
+
+	//void TempName()
+	//{
+	//	foreach (Transform child in transform)
+	//	{
+	//		if (!child.name.StartsWith("Collider")) continue;
+	//		RaycastHit hit;
+	//		if (!Physics.Raycast(child.position + Vector3.down * 20, Vector3.up, out hit, 30, Tiles)) continue;
+
+	//		var script = hit.transform.GetComponent<DragAndPlace>();
+	//		if (!script) continue;
+	//		if (script.ReachedHeight)
+	//		{
+	//			HandleIsAreaFree(false);
+	//		}
+	//	}
+	//}
 }

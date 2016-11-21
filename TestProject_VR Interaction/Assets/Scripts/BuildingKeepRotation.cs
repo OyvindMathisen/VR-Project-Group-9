@@ -15,8 +15,6 @@ public class BuildingKeepRotation : MonoBehaviour
 
 	void Update()
 	{
-		// Prevents the building from following the controllers exact rotation.
-		// TODO: Improve to avoid the building wobbling around in the hand if shaken roughly.
 		if (_buildingMovementScript.Dropped) return; // Does not run if the building has been placed.
 		transform.rotation = Quaternion.Euler(Vector3.up * yRotation);
 	}
@@ -40,5 +38,10 @@ public class BuildingKeepRotation : MonoBehaviour
 	void SaveRotation()
 	{
 		yRotation = transform.rotation.eulerAngles.y;
+	}
+
+	public void FinalizeRotation()
+	{
+		transform.rotation = Quaternion.Euler(Vector3.up * yRotation);
 	}
 }

@@ -46,8 +46,9 @@ public class BeginGameDetection : MonoBehaviour
 	{
 		var gameObjectWithScript = other.transform.parent.gameObject;
 
-		// Check why this does not trigger.
-        if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
+        // Check why this does not trigger.
+        // TODO: CHECK IF CORRECT TAG
+        if (other.tag != "Building" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Add(other.transform.parent.gameObject);
 	}
 
@@ -55,8 +56,8 @@ public class BeginGameDetection : MonoBehaviour
 	void OnTriggerExit(Collider other)
 	{
 		var gameObjectWithScript = other.transform.parent.gameObject;
-
-		if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
+        // TODO: CHECK IF CORRECT TAG
+        if (other.tag != "Building" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Remove(other.transform.parent.gameObject);
 	}
 }

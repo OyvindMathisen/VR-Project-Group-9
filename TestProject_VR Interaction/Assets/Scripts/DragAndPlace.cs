@@ -10,7 +10,7 @@ public class DragAndPlace : MoveObject
 	public bool ReachedHeight;
 
 	private GameObject _previewPlacement;
-	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced;
+	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced, _keepFalling;
 	private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
 	private Quaternion _lastSafeRot;
 	private Combiner _combiner;
@@ -31,7 +31,8 @@ public class DragAndPlace : MoveObject
 
 		_lastSafePos = Vector3.zero;
 
-		
+        // TODO: UNDO temporary on pc development
+	    _areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
 
 		// if placed is true to begin with, it's probably a combined building
 		if (!Dropped) return;
@@ -68,6 +69,7 @@ public class DragAndPlace : MoveObject
 
 				_oncePlaced = false;
 				ReachedHeight = false;
+			    _keepFalling = false;
 
 				_onceNotPlaced = true;
 			}
@@ -89,13 +91,22 @@ public class DragAndPlace : MoveObject
 		// If the building has been placed.
 		else
 		{
-			if (!_oncePlaced)
+            if (!_oncePlaced)
 			{
-				Place();
-			}
+                Place();
+                _oncePlaced = true;
+            }
 
-			// while the building is not at specified height
-			if (!transform.position.y.Equals(GameSettings.BUILD_HEIGHT))
+            if (_keepFalling)
+            {
+                transform.Translate(0, -BuildingFallSpeed, 0);
+
+                if (transform.position.y < -100) Destroy(gameObject);
+                return;
+            }
+
+            // while the building is not at specified height
+            if (!transform.position.y.Equals(GameSettings.BUILD_HEIGHT))
 			{
 				transform.Translate(0, -BuildingFallSpeed, 0);
 
@@ -179,7 +190,6 @@ public class DragAndPlace : MoveObject
 
 		_hasEverBeenPlaced = true;
 		_onceNotPlaced = false;
-		_oncePlaced = true;
 	}
 
 	public void FinalRotation()
@@ -228,7 +238,7 @@ public class DragAndPlace : MoveObject
 			c.enabled = false;
 		}
 
-		HandleIsAreaFree();
+		HandleArea();
 		return base.DropMe(controller);
 	}
 
@@ -312,13 +322,25 @@ public class DragAndPlace : MoveObject
 		_connectedColliders.AddRange(gameObjects);
 	}
 
-	void HandleIsAreaFree(bool alsoCheckArea = true)
+	void HandleArea(bool skipCheckArea = false)
 	{
-		if (alsoCheckArea)
-		{
-			if (_areaCheck.IsAreaFree()) return;
-		}
-		if (_hasEverBeenPlaced)
+	    if (!skipCheckArea)
+	    {
+	        switch (_areaCheck.GetAreaStatus())
+	        {
+                case "Available":
+                    if (_areaCheck.IsAreaFree()) return;
+	                break;
+                case "Nothing":
+	                _keepFalling = true;
+	                return;
+                case "Occupied":
+                    // proceed
+                    break;
+            }
+	    }
+
+	    if (_hasEverBeenPlaced)
 		{
 			transform.rotation = _lastSafeRot;
 			transform.position = _lastSafePos;

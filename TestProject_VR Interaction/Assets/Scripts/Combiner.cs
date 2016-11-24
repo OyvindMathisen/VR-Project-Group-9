@@ -143,7 +143,7 @@ public class Combiner : MonoBehaviour
 	public void PlayCancelSound()
 	{
 		var sfx = _previewPlacement.FindChild("sfxCancel").GetComponent<AudioSource>();
-		sfx.pitch = UnityEngine.Random.Range(0.8f, 0.9f);
+		sfx.pitch = Random.Range(0.8f, 0.9f);
 		sfx.Play();
 	}
 
@@ -188,7 +188,7 @@ public class Combiner : MonoBehaviour
 			UpdateUI();
 
 			var sfx = _previewPlacement.FindChild("sfxUI0").GetComponent<AudioSource>();
-			sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
+			sfx.pitch = Random.Range(0.9f, 1.2f);
 			sfx.Play();
 		}
 		else
@@ -204,7 +204,7 @@ public class Combiner : MonoBehaviour
 		Cancel();
 
 		var sfx = _previewPlacement.FindChild("sfxCombine").GetComponent<AudioSource>();
-		sfx.pitch = UnityEngine.Random.Range(1f, 1.2f);
+		sfx.pitch = Random.Range(1f, 1.2f);
 		sfx.Play();
 	}
 

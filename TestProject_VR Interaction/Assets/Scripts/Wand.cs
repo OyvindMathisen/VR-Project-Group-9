@@ -50,14 +50,14 @@ public class Wand : MonoBehaviour
 
 	void Update()
 	{
-		// Check to make sure the controller actually connected.
-		if (Controller == null)
-		{
-			Debug.Log("Controller not initialized");
-			return;
-		}
+        // Check to make sure the controller actually connected.
+        if (Controller == null)
+        {
+            Debug.Log("Controller not initialized");
+            return;
+        }
 
-		CheckTouchpadStates();
+        CheckTouchpadStates();
 		CheckButtonStates();
 
 		HandleControls();

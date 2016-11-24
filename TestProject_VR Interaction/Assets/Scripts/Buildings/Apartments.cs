@@ -10,7 +10,8 @@ public class Apartments : MonoBehaviour
 
 	private LayerMask _tiles;
 	private Combiner _combiner;
-	private List<GameObject> _trashCan = new List<GameObject>();
+    private ComboTracker _comboTracker;
+    private List<GameObject> _trashCan = new List<GameObject>();
 	private List<GameObject>[] _garbageBin;
 	private GameObject result;
 
@@ -23,8 +24,9 @@ public class Apartments : MonoBehaviour
 		_xSize = _zSize = GameSettings.SNAP_VALUE;
 		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
 		_combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+        _comboTracker = _combiner.transform.GetComponent<ComboTracker>();
 
-		xPos = new[] { 0, 1, 1, 0, 0, 1, 2, 2, 2, 0, 1 };
+        xPos = new[] { 0, 1, 1, 0, 0, 1, 2, 2, 2, 0, 1 };
 		zPos = new[] { 1, 1, 0, 1, 2, 2, 2, 1, 0, 1, 1 };
 
 		xAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -76,11 +78,17 @@ public class Apartments : MonoBehaviour
 					}
 					else continue;
 
-					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile)) continue;
-					_combiner.Alternatives.Add(gameObject);
+					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile))
+                    {
+                        _trashCan.Clear();
+                        continue;
+                    }
+                    _combiner.Alternatives.Add(gameObject);
 					_combiner.Names.Add(result.name);
 					_combiner.I.Add(i);
 
+					_trashCan.Add(gameObject);
+					_combiner.RelevantBuildings.Add(new List<GameObject>(_trashCan));
 					_garbageBin[i].AddRange(_trashCan);
 					_trashCan.Clear();
 				}
@@ -89,8 +97,8 @@ public class Apartments : MonoBehaviour
 		else
 		{
 			Instantiate(result, transform.position + transform.right * _xSize * xAdj[I] + transform.forward * _zSize * zAdj[I], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[I], 0));
-			_garbageBin[I].Add(gameObject);
-			foreach (var obj in _garbageBin[I]) Destroy(obj);
-		}
+            _combiner.DeletePredecessors(_garbageBin[I]);
+            _comboTracker.CheckIfNew(result.name);
+        }
 	}
 }

@@ -18,6 +18,7 @@ public class AreaCheck : MonoBehaviour
 
 	public LayerMask VegetationLayer;
 	public LayerMask Tiles;
+    public LayerMask Occupied, Available;
 
 	public List<Transform> FeaturedVegTiles = new List<Transform>();
 
@@ -108,12 +109,45 @@ public class AreaCheck : MonoBehaviour
 			if (child.gameObject.name.StartsWith("Preview"))
 			{
 				RaycastHit hit;
-				if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, Mathf.Infinity, Tiles) &&
+				if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Tiles) &&
 					hit.collider.tag == "Tile" &&
 					hit.transform.GetComponent<DragAndPlace>().Dropped)
 					return false;
-			}
+                if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Tiles) &&
+                    hit.collider.tag == "Tile" &&
+                    hit.transform.GetComponent<DragAndPlace>().Dropped)
+                    return false;
+            }
 		}
 		return true;
 	}
+
+    public string GetAreaStatus()
+    {
+        // check if the tile(s) in the building fit to be placed or thrown off the island
+        // if not either delete or move building back to where it was
+        var availableCount = 0;
+        var nothingCount = 0;
+        foreach (Transform child in _wrap)
+        {
+            if (child.gameObject.name.StartsWith("Preview"))
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Occupied))
+                    return "Occupied";
+                if (!Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Available))
+                {
+                    availableCount++;
+                    continue;
+                }
+                nothingCount++;
+            }
+        }
+        if (availableCount == transform.childCount)
+            return "Available";
+        if (nothingCount == transform.childCount)
+            return "Nothing";
+
+        return "Occupied";
+    }
 }

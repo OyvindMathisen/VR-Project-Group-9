@@ -11,6 +11,7 @@ public class LuxuryHouse : MonoBehaviour
 
 	private LayerMask _tiles;
 	private Combiner _combiner;
+    private ComboTracker _comboTracker;
 	private List<GameObject> _trashCan = new List<GameObject>();
 	private List<GameObject>[] _garbageBin;
 	private GameObject result;
@@ -23,6 +24,7 @@ public class LuxuryHouse : MonoBehaviour
 		_xSize = _zSize = GameSettings.SNAP_VALUE;
 		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
 		_combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+	    _comboTracker = _combiner.transform.GetComponent<ComboTracker>();
 
 		// raycast positions (valid tiles for the combo) from "main" tile (transform.position), where "1" is 8 units
 		xPos = new[] { 1, 1, -1, -1, -1, -1, 1, 1 };
@@ -88,6 +90,7 @@ public class LuxuryHouse : MonoBehaviour
 		{
 			Instantiate(result, transform.position + transform.right * _xSize * xAdj[I] + transform.forward * _zSize * zAdj[I], Quaternion.Euler(0, transform.localEulerAngles.y + rotAdj[I], 0));
 			_combiner.DeletePredecessors(_garbageBin[I]);
+            _comboTracker.CheckIfNew(result.name);
 		}
 	}
 }

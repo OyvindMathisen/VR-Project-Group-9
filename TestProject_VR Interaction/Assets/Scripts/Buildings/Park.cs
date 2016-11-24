@@ -10,7 +10,8 @@ public class Park : MonoBehaviour
 
 	private LayerMask _tiles;
 	private Combiner _combiner;
-	private List<GameObject> _trashCan = new List<GameObject>();
+    private ComboTracker _comboTracker;
+    private List<GameObject> _trashCan = new List<GameObject>();
 	private List<GameObject>[] _garbageBin;
 	private GameObject result;
 
@@ -21,8 +22,9 @@ public class Park : MonoBehaviour
 		_xSize = _zSize = GameSettings.SNAP_VALUE;
 		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
 		_combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+        _comboTracker = _combiner.transform.GetComponent<ComboTracker>();
 
-		xPos = new[] { 1, 0, -1, 0 };
+        xPos = new[] { 1, 0, -1, 0 };
 		zPos = new[] { 0, 1, 0, -1 };
 
 		xAdj = new[] { 0, 0, 0, 0 };
@@ -62,9 +64,13 @@ public class Park : MonoBehaviour
 					}
 					else continue;
 
-					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile)) continue;
-					// to prevent two possible alternatives when it's actually one
-					if (result == Sculpture && _combiner.LastPlacedTile != gameObject) continue;
+					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile))
+                    {
+                        _trashCan.Clear();
+                        continue;
+                    }
+                    // to prevent two possible alternatives when it's actually one
+                    if (result == Sculpture && _combiner.LastPlacedTile != gameObject) continue;
 					_combiner.Alternatives.Add(gameObject);
 					_combiner.Names.Add(result.name);
 					_combiner.I.Add(i);
@@ -91,6 +97,7 @@ public class Park : MonoBehaviour
 				_garbageBin[I].Add(gameObject);
 				_combiner.DeletePredecessors(_garbageBin[I]);
 			}
-		}
+            _comboTracker.CheckIfNew(result.name);
+        }
 	}
 }

@@ -7,16 +7,16 @@ public class GameDataHandler : MonoBehaviour
     public LayerMask VegetationLayer;
 	void Awake ()
 	{
-        SaveAndLoad.Load();
-	    if (SaveAndLoad.savedGames.Count > 0)
-	    {
-            // TODO: load when starting up the scene (remember to show maingameobjects and hide gamemenu?)
-            //Continue();
-        }
-        else
-        {
-            GameFile.current = new GameFile();
-        }
+        
+	    //if (SaveAndLoad.savedGames.Count > 0)
+	    //{
+     //       // TODO: load when starting up the scene (remember to show maingameobjects and hide gamemenu?)
+     //       //Continue();
+     //   }
+     //   else
+     //   {
+            
+     //   }
 	}
 
 	void Update ()
@@ -24,10 +24,12 @@ public class GameDataHandler : MonoBehaviour
         // TODO: replace F5 and F6 with actual ways to load and save in VR
         if (Input.GetKeyDown(KeyCode.F5))
 	    {
+            Debug.Log("Saving!");
 	        Save();
 	    }
         if (Input.GetKeyDown(KeyCode.F6))
         {
+            Debug.Log("Loading!");
             Continue();
         }
     }
@@ -36,7 +38,15 @@ public class GameDataHandler : MonoBehaviour
     {
         var buildings = GameObject.FindGameObjectsWithTag("Building");
         for (var i = 0; i < buildings.Length; i++)
-            GameFile.current.buildings[i] = new Building(buildings[i].name, buildings[i].transform.position, buildings[i].transform.eulerAngles);
+        {
+            var script = buildings[i].GetComponent<DragAndPlace>();
+            if (!script) continue;
+            if (script.keepFalling) continue;
+            string[] name = buildings[i].name.Split('(');
+            Debug.Log(name);
+                GameFile.current.buildings[i] = new Building(name[0], buildings[i].transform.position, buildings[i].transform.eulerAngles);
+        }
+            
         SaveAndLoad.Save();
     }
 

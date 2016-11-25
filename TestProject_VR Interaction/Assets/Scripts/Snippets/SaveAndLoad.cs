@@ -14,8 +14,7 @@ public static class SaveAndLoad
     {
         savedGames.Add(GameFile.current);
         BinaryFormatter bf = new BinaryFormatter();
-        //Application.persistentDataPath is a string, so if you wanted you can put that into debug.log if you want to know where save games are located
-        FileStream file = File.Create(Application.persistentDataPath + "/savedData.comboland"); //you can call it anything you want
+        FileStream file = File.Create(Application.persistentDataPath + "/savedData.comboland");
         bf.Serialize(file, savedGames);
         file.Close();
     }
@@ -29,5 +28,10 @@ public static class SaveAndLoad
             savedGames = (List<GameFile>)bf.Deserialize(file);
             file.Close();
         }
+    }
+
+    public static bool FileExists()
+    {
+        return File.Exists(Application.persistentDataPath + "/savedData.comboland");
     }
 }

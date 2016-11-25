@@ -18,7 +18,7 @@ public class AreaCheck : MonoBehaviour
 
 	public LayerMask VegetationLayer;
 	public LayerMask Tiles;
-    public LayerMask Occupied, Available;
+    public LayerMask Occupied, Available, PreviewLayer;
 
 	public List<Transform> FeaturedVegTiles = new List<Transform>();
 
@@ -128,14 +128,20 @@ public class AreaCheck : MonoBehaviour
         // if not either delete or move building back to where it was
         var availableCount = 0;
         var nothingCount = 0;
+        var previewCount = 0;
         foreach (Transform child in _wrap)
         {
             if (child.gameObject.name.StartsWith("Preview"))
             {
+                previewCount++;
+
+                if (Physics.OverlapBox(child.position, Vector3.one * 4, Quaternion.identity, PreviewLayer).Length > 1)
+                    return "Overlap";
+
                 RaycastHit hit;
                 if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Occupied))
                     return "Occupied";
-                if (!Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Available))
+                if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Available))
                 {
                     availableCount++;
                     continue;
@@ -143,9 +149,9 @@ public class AreaCheck : MonoBehaviour
                 nothingCount++;
             }
         }
-        if (availableCount == transform.childCount)
+        if (availableCount == previewCount)
             return "Available";
-        if (nothingCount == transform.childCount)
+        if (nothingCount == previewCount)
             return "Nothing";
 
         return "Occupied";

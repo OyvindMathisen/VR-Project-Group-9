@@ -8,14 +8,19 @@ public class DragAndPlace : MoveObject
 	public LayerMask Tiles, VegetationLayer;
 	public float BuildingFallSpeed = 1.5f;
 	public bool ReachedHeight;
+    public bool keepFalling;
 
-	private GameObject _previewPlacement;
-	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced, _keepFalling;
+
+    private GameObject _previewPlacement, _previewPlacementL, _previewPlacementR;
+	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced;
 	private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
 	private Quaternion _lastSafeRot;
 	private Combiner _combiner;
+    private const float FALL_DISTANCE = 1000;
 
 	private AreaCheck _areaCheck;
+
+    private bool _isRightHand;
 
 	private BuildingKeepRotation _buildingRotation;
 
@@ -24,15 +29,15 @@ public class DragAndPlace : MoveObject
 
 	void Awake()
 	{
-		// TODO: Replace these Find's with public variables, dragged into from the editor.
-		_previewPlacement = GameObject.FindWithTag("PreviewPlacement");
-		_combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
+		_previewPlacementL = GameObject.FindWithTag("PreviewPlacementLeft");
+        _previewPlacementR = GameObject.FindWithTag("PreviewPlacementRight");
+        _combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
 		transform.parent = GameObject.Find("Tiles").transform;
 
 		_lastSafePos = Vector3.zero;
 
         // TODO: UNDO temporary on pc development
-	    _areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
+	    // _areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
 
 		// if placed is true to begin with, it's probably a combined building
 		if (!Dropped) return;
@@ -69,7 +74,7 @@ public class DragAndPlace : MoveObject
 
 				_oncePlaced = false;
 				ReachedHeight = false;
-			    _keepFalling = false;
+			    keepFalling = false;
 
 				_onceNotPlaced = true;
 			}
@@ -97,11 +102,11 @@ public class DragAndPlace : MoveObject
                 _oncePlaced = true;
             }
 
-            if (_keepFalling)
+            if (keepFalling)
             {
                 transform.Translate(0, -BuildingFallSpeed, 0);
 
-                if (transform.position.y < -100) Destroy(gameObject);
+                if (transform.position.y < -FALL_DISTANCE) Destroy(gameObject);
                 return;
             }
 
@@ -245,7 +250,13 @@ public class DragAndPlace : MoveObject
 	public void OnGrab()
 	{
 		_areaCheck = Holder.AreaCheck;
-		Holder.AreaCheck.NewPreviewArea(gameObject);
+
+        // To keep track of what hand is holding the building.
+        _isRightHand = (_areaCheck.transform.name == "PreviewPlacementRight");
+        _previewPlacement = _isRightHand ? _previewPlacementR : _previewPlacementL;
+
+
+        Holder.AreaCheck.NewPreviewArea(gameObject);
 		Holder.AreaCheck.DistanceToPreviewPlacement = Holder.AreaCheck.transform.position - transform.position;
 
 		// start fade-in on vegetation where the building has been
@@ -332,9 +343,10 @@ public class DragAndPlace : MoveObject
                     if (_areaCheck.IsAreaFree()) return;
 	                break;
                 case "Nothing":
-	                _keepFalling = true;
+	                keepFalling = true;
 	                return;
                 case "Occupied":
+                case "Overlap":
                     // proceed
                     break;
             }

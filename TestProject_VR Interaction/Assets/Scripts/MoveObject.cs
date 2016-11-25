@@ -14,15 +14,15 @@ public class MoveObject : MonoBehaviour
 		return true; // Confirm the object has now been dropped.
 	}
 
-	public virtual void GrabMe(Wand controller)
+    public virtual void GrabMe(Wand controller)
 	{
 		if (Holder) // Checks if there is any controller actually holding it.
 		{
-			// Resets the tile state if not.
+			// Resets the tile state if so.
 			Holder.AreaCheck.DeletePreviews();
-			Holder.Drop();
+            Holder.ChangeWand();
 		}
-		// Sets the controllers parent into the controller that grabbed it.
+		// Makes the Holder script the controller we sent in, and sets the parent of the tile to the controller itself.
 		Holder = controller;
 		transform.parent = controller.transform;
 	}

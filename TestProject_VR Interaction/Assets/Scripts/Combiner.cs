@@ -37,7 +37,8 @@ public class Combiner : MonoBehaviour
 		_number = _indicator.transform.FindChild("Number").GetComponent<TextMesh>();
 		_number2 = _indicator.transform.FindChild("Number2").GetComponent<TextMesh>();
 		_wrap = transform.FindChild("Wrap");
-		_previewPlacement = GameObject.FindWithTag("PreviewPlacement").transform;
+
+		_previewPlacement = GameObject.FindWithTag("PreviewPlacementLeft").transform;
 
 		_timerWidth = _timer.localScale.x;
 		nextDelay = GameSettings.COMBO_DECISION_TIME;

@@ -5,9 +5,19 @@ public class BeginGameDetection : MonoBehaviour
 {
 	public GameObject MainGameObjects;
 	public GameObject MainMenuObjects;
-	public GameObject TilesLocation;
+
+    public bool continueGame;
 
 	private List<GameObject> _objectsInGameStartArea = new List<GameObject>();
+
+    private GameDataHandler _GDH;
+    void Start()
+    {
+        if (continueGame && !SaveAndLoad.FileExists())
+            gameObject.SetActive(false);
+
+        _GDH = GameObject.FindWithTag("Island").GetComponent<GameDataHandler>();
+    }
 
 	// Update is called once per frame
 	void Update()
@@ -22,23 +32,28 @@ public class BeginGameDetection : MonoBehaviour
 
 	void LaunchGame()
 	{
-		// Currently not functioning, since we cannot put the tilelocation transform onto the object.
-		/*
-		// Deletes excess buildings if the player has placed more than minimum.
-		if (TilesLocation.transform.childCount > 0)
-		{
-			foreach (Transform child in TilesLocation.transform)
-			{
-				Destroy(child.gameObject);
-			}
-		}
-		*/
+        // TODO: Find alternative, non Find method.
+        GameObject[] gameObjectArray = GameObject.FindGameObjectsWithTag("Start");
+
+        foreach (GameObject startBlocks in gameObjectArray)
+            Destroy(startBlocks);
 
 		// Turns off main menu mode and turns on the game.
 		MainGameObjects.SetActive(true);
 		MainMenuObjects.SetActive(false);
 
-		Destroy(gameObject); // Cleanup of the object after tutorial is done.
+        if (continueGame)
+        {
+            SaveAndLoad.Load();
+            _GDH.Continue();
+        }
+        else
+        {
+            GameFile.current = new GameFile();
+            SaveAndLoad.Save();
+        }
+
+		Destroy(_objectsInGameStartArea[0]); // Cleanup of the object after tutorial is done.
 	}
 
 	// Adds all blocks entering the start-game field into a list.
@@ -48,7 +63,7 @@ public class BeginGameDetection : MonoBehaviour
 
         // Check why this does not trigger.
         // TODO: CHECK IF CORRECT TAG
-        if (other.tag != "Building" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
+        if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Add(other.transform.parent.gameObject);
 	}
 
@@ -57,7 +72,7 @@ public class BeginGameDetection : MonoBehaviour
 	{
 		var gameObjectWithScript = other.transform.parent.gameObject;
         // TODO: CHECK IF CORRECT TAG
-        if (other.tag != "Building" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
+        if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Remove(other.transform.parent.gameObject);
 	}
 }

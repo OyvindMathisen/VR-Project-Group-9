@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: b52a96860a3b93748aa5c8e886b45159
-timeCreated: 1478831184
+guid: 396a5d4cea69cee449871a0ff22cc743
+timeCreated: 1480031401
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,8 +9,7 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: Skies
-    9500000: //RootNode
+    4300000: Cube
   materials:
     importMaterials: 1
     materialName: 0
@@ -69,7 +68,7 @@ ModelImporter:
     rootMotionBoneName: 
     hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

@@ -30,6 +30,12 @@ public static class SaveAndLoad
         }
     }
 
+    public static void Delete()
+    {
+        if (File.Exists(Application.persistentDataPath + "/savedData.comboland"))
+            File.Delete(Application.persistentDataPath + "/savedData.comboland");
+    }
+
     public static bool FileExists()
     {
         return File.Exists(Application.persistentDataPath + "/savedData.comboland");

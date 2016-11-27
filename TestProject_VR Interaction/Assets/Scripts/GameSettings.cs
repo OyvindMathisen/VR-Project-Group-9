@@ -31,5 +31,9 @@ public class GameSettings : MonoBehaviour
 	/// The time the user gets to decide if the current combination alternative is the one the user wants.
 	/// </summary>
 	public static float COMBO_DECISION_TIME = 4.0f; //normally 4.0f - dev mode atm
+    /// <summary>
+	/// How many combos are possible to do?
+	/// </summary>
+	public static int TOTAL_COMBO_COUNT = 17; //normally 4.0f - dev mode atm
 
 }

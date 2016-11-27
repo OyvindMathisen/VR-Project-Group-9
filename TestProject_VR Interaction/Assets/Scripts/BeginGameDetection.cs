@@ -9,14 +9,10 @@ public class BeginGameDetection : MonoBehaviour
     public bool continueGame;
 
 	private List<GameObject> _objectsInGameStartArea = new List<GameObject>();
-
-    private GameDataHandler _GDH;
     void Start()
     {
         if (continueGame && !SaveAndLoad.FileExists())
             gameObject.SetActive(false);
-
-        _GDH = GameObject.FindWithTag("Island").GetComponent<GameDataHandler>();
     }
 
 	// Update is called once per frame
@@ -45,13 +41,17 @@ public class BeginGameDetection : MonoBehaviour
         if (continueGame)
         {
             SaveAndLoad.Load();
-            _GDH.Continue();
+            GameDataHandler.Save();
         }
         else
         {
+            SaveAndLoad.Delete();
             GameFile.current = new GameFile();
             SaveAndLoad.Save();
         }
+
+        // so the tutorial movie won't continue playing (it will even if the object isn't active)
+        transform.parent.FindChild("TutorialScreen").FindChild("Movie").GetComponent<Movie>().StopMovie();
 
 		Destroy(_objectsInGameStartArea[0]); // Cleanup of the object after tutorial is done.
 	}
@@ -62,7 +62,6 @@ public class BeginGameDetection : MonoBehaviour
 		var gameObjectWithScript = other.transform.parent.gameObject;
 
         // Check why this does not trigger.
-        // TODO: CHECK IF CORRECT TAG
         if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Add(other.transform.parent.gameObject);
 	}
@@ -71,7 +70,7 @@ public class BeginGameDetection : MonoBehaviour
 	void OnTriggerExit(Collider other)
 	{
 		var gameObjectWithScript = other.transform.parent.gameObject;
-        // TODO: CHECK IF CORRECT TAG
+
         if (other.tag != "Tile" && !_objectsInGameStartArea.Contains(gameObjectWithScript)) return;
 		_objectsInGameStartArea.Remove(other.transform.parent.gameObject);
 	}

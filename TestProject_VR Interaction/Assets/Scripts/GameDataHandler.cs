@@ -1,40 +1,13 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using System.Linq;
 
 public class GameDataHandler : MonoBehaviour
 {
-    public LayerMask VegetationLayer;
-	void Awake ()
-	{
-        
-	    //if (SaveAndLoad.savedGames.Count > 0)
-	    //{
-     //       // TODO: load when starting up the scene (remember to show maingameobjects and hide gamemenu?)
-     //       //Continue();
-     //   }
-     //   else
-     //   {
-            
-     //   }
-	}
+    public static LayerMask VegetationLayer;
 
-	void Update ()
-	{
-        // TODO: replace F5 and F6 with actual ways to load and save in VR
-        if (Input.GetKeyDown(KeyCode.F5))
-	    {
-            Debug.Log("Saving!");
-	        Save();
-	    }
-        if (Input.GetKeyDown(KeyCode.F6))
-        {
-            Debug.Log("Loading!");
-            Continue();
-        }
-    }
-
-    public void Save()
+    public static void Save()
     {
         var buildings = GameObject.FindGameObjectsWithTag("Building");
         for (var i = 0; i < buildings.Length; i++)
@@ -50,12 +23,12 @@ public class GameDataHandler : MonoBehaviour
         SaveAndLoad.Save();
     }
 
-    public void Continue()
+    public static void Continue()
     {
         foreach (var g in SaveAndLoad.savedGames)
         {
             GameFile.current = g;
-            break; // until we add possibility for multiple save files
+            break; // until we add possibility for multiple save files (most likely not)
         }
 
         foreach (var building in GameFile.current.buildings)
@@ -70,7 +43,6 @@ public class GameDataHandler : MonoBehaviour
             script.Dropped = true;
             script.ReachedHeight = true;
 
-            // TODO: test if this actually works
             foreach (Transform child in b.transform)
             {
                 if (!child.gameObject.name.StartsWith("Collider")) continue;
@@ -83,5 +55,10 @@ public class GameDataHandler : MonoBehaviour
                 }
             }
         }
+
+        // load in which combos have already been done
+        var comboTracker = GameObject.Find("Combiner").GetComponent<ComboTracker>();
+        comboTracker.CombosDone = GameFile.current.combosDone.ToList();
+        comboTracker.UpdateCount();
     }
 }

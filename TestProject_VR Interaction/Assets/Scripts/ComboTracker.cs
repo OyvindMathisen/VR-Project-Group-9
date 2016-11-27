@@ -7,24 +7,36 @@ public class ComboTracker : MonoBehaviour
     public GameObject New;
     private Transform _indicator;
     private Vector3 _storedIndPos;
-    private List<string> _combosDone = new List<string>();
+    public List<string> CombosDone = new List<string>();
+    private TextMesh _comboCount;
 	void Awake () {
-	    _indicator = GameObject.Find("Combiner").transform.FindChild("Indicator");
-    }
+	    _indicator = transform.FindChild("Indicator");
+	    _comboCount = GameObject.Find("MainGameObjects").transform.FindChild("ComboScreen/ComboCount/Count").GetComponent<TextMesh>();
+	    UpdateCount();
+	}
 
     public void CheckIfNew(string buildingName)
     {
-        if (!_combosDone.Contains(buildingName))
+        if (!CombosDone.Contains(buildingName))
         {
-            _combosDone.Add(buildingName);
+            CombosDone.Add(buildingName);
             Invoke("SpawnPopup", 1f);
             _storedIndPos = _indicator.position;
-            // TODO: keep player updated of _combosDone.Count (out of around 30?) e.g. on the palette
+
+            UpdateCount();
+
+            GameFile.current.combosDone = CombosDone.ToArray();
         }
     }
 
     private void SpawnPopup()
     {
         Instantiate(New, _storedIndPos + Vector3.up * 14, Quaternion.identity);
+    }
+
+    public void UpdateCount()
+    {
+        // keeping player updated of how many combos are "found"
+        _comboCount.text = CombosDone.Count + "/" + GameSettings.TOTAL_COMBO_COUNT;
     }
 }

@@ -10,7 +10,7 @@ public class Sign : MonoBehaviour {
     void Awake () {
         _cam = GameObject.FindWithTag("MainCamera").transform;
         _indicator = transform.parent.FindChild("Indicator");
-        _sr = GetComponent<SpriteRenderer>();
+        _sr = transform.FindChild("Sign").GetComponent<SpriteRenderer>();
     }
 	
 	void Update () {

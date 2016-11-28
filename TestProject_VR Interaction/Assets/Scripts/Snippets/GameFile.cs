@@ -4,7 +4,6 @@ using System.Collections;
 [System.Serializable]
 public class GameFile
 {
-
     public static GameFile current;
     public Building[] buildings;
     public string[] combosDone;

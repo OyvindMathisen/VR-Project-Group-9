@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class ComboTracker : MonoBehaviour
 {
 
-    public GameObject New;
+    public GameObject New, MainGameObjects;
     public Material Lava;
 
     private Transform _indicator, _water;
@@ -14,7 +14,7 @@ public class ComboTracker : MonoBehaviour
 	void Awake ()
     {
 	    _indicator = transform.FindChild("Indicator");
-	    _comboCount = GameObject.Find("MainGameObjects").transform.FindChild("ComboScreen/ComboCount/Count").GetComponent<TextMesh>();
+	    _comboCount = MainGameObjects.transform.FindChild("ComboScreen/ComboCount/Count").GetComponent<TextMesh>();
         _water = GameObject.Find("Island").transform.FindChild("Water");
     }
 

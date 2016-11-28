@@ -6,18 +6,23 @@ using System.Linq;
 public class GameDataHandler : MonoBehaviour
 {
     public static LayerMask VegetationLayer;
+    public LayerMask VegetationLayerNonStatic;
+
+    void Awake()
+    {
+        VegetationLayer = VegetationLayerNonStatic;
+    }
 
     public static void Save()
     {
         var buildings = GameObject.FindGameObjectsWithTag("Building");
         for (var i = 0; i < buildings.Length; i++)
-        {
+        {        
             var script = buildings[i].GetComponent<DragAndPlace>();
             if (!script) continue;
             if (script.keepFalling) continue;
             string[] name = buildings[i].name.Split('(');
-            Debug.Log(name);
-                GameFile.current.buildings[i] = new Building(name[0], buildings[i].transform.position, buildings[i].transform.eulerAngles);
+            GameFile.current.buildings[i] = new Building(name[0], buildings[i].transform.position, buildings[i].transform.eulerAngles);
         }
             
         SaveAndLoad.Save();
@@ -38,6 +43,7 @@ public class GameDataHandler : MonoBehaviour
             // instantiate all the buildings from saved file
             string prefabPath = "Buildings/" + building.name;
             var b = Instantiate(Resources.Load(prefabPath, typeof(GameObject)), new Vector3(building.posX, GameSettings.BUILD_HEIGHT, building.posZ), Quaternion.Euler(building.rotX, building.rotY, building.rotZ)) as GameObject;
+
             var script = b.GetComponent<DragAndPlace>();
             if (!script) continue; // If script is null.
             script.Dropped = true;
@@ -58,7 +64,11 @@ public class GameDataHandler : MonoBehaviour
 
         // load in which combos have already been done
         var comboTracker = GameObject.Find("Combiner").GetComponent<ComboTracker>();
-        comboTracker.CombosDone = GameFile.current.combosDone.ToList();
+        foreach (var text in GameFile.current.combosDone)
+            if (text.Length > 0)
+                comboTracker.CombosDone.Add(text);
+
+
         comboTracker.UpdateCount();
     }
 }

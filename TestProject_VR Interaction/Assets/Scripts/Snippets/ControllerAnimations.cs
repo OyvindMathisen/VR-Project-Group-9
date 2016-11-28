@@ -37,26 +37,52 @@ public class ControllerAnimations : MonoBehaviour
 
         _scaleBall1 = _ball.transform.localScale;
         _scaleBall2 = _scaleBall1*4;
-        _posBall1 = _ball.position.z;
-        _posBall2 = _ball.position.z*3;
+        _posBall1 = _ball.localPosition.z;
+        _posBall2 = _ball.localPosition.z*3;
 
         _posDone2 = true;
+
+
     }
 
 	void Update ()
 	{
         // visual animated effects for the look and feel of picking up and dropping objects with the controllers
+
+        if (_controller.TriggerButtonPressed)
+        {
+            // circle scale (small)
+            var newScale = transform.localScale;
+            newScale.x = Mathf.Lerp(transform.localScale.x, _scale1.x, SMOOTH);
+            newScale.y = Mathf.Lerp(transform.localScale.y, _scale1.y, SMOOTH);
+            newScale.z = Mathf.Lerp(transform.localScale.z, _scale1.z, SMOOTH);
+            transform.localScale = newScale;
+
+            // circle color (red)
+            var oldColor = _mr.material.color;
+            var red = Mathf.Lerp(_mr.material.color.r, 1, SMOOTH);
+            var color = new Color(red, 0, 0, oldColor.a);
+            _mr.material.SetColor("_Color", color);
+        }
+        else
+        {
+            // circle scale (big)
+            var newScale = transform.localScale;
+            newScale.x = Mathf.Lerp(transform.localScale.x, _scale2.x, SMOOTH);
+            newScale.y = Mathf.Lerp(transform.localScale.y, _scale2.y, SMOOTH);
+            newScale.z = Mathf.Lerp(transform.localScale.z, _scale2.z, SMOOTH);
+            transform.localScale = newScale;
+
+            // circle color (black)
+            var oldColor = _mr.material.color;
+            var color = new Color(0.17f, 0.17f, 0.17f, oldColor.a);
+            _mr.material.SetColor("_Color", color);
+        }
+
         if (_controller.IsHolding)
 	    {
 	        if (!_posDone1)
 	        {
-                // circle scale (small)
-	            var newScale = transform.localScale;
-	            newScale.x = Mathf.Lerp(transform.localScale.x, _scale1.x, SMOOTH);
-	            newScale.y = Mathf.Lerp(transform.localScale.y, _scale1.y, SMOOTH);
-	            newScale.z = Mathf.Lerp(transform.localScale.z, _scale1.z, SMOOTH);
-	            transform.localScale = newScale;
-
                 // ball scale (big)
                 var newScaleBall = _ball.localScale;
                 newScaleBall.x = Mathf.Lerp(_ball.localScale.x, _scaleBall2.x, SMOOTH);
@@ -65,15 +91,9 @@ public class ControllerAnimations : MonoBehaviour
                 _ball.localScale = newScaleBall;
 
                 // ball position (forwards)
-                var newPosBall = _ball.transform.position;
-                newPosBall.z = Mathf.Lerp(_ball.position.z, _posBall2, SMOOTH);
-                _ball.transform.position = newPosBall;
-
-                // circle color (red)
-                var oldColor = _mr.material.color;
-                var red = Mathf.Lerp(_mr.material.color.r, 1, SMOOTH);
-                var color = new Color(red, 0, 0, oldColor.a);
-                _mr.material.SetColor("_Color", color);
+                var newPosBall = _ball.transform.localPosition;
+                newPosBall.z = Mathf.Lerp(_ball.localPosition.z, _posBall2, SMOOTH);
+                _ball.transform.localPosition = newPosBall;
 
                 // ball alpha (invisible)
                 var oldColorBall = _ballMR.material.color;
@@ -89,18 +109,11 @@ public class ControllerAnimations : MonoBehaviour
 	    else
 	    {
             // wild ball rotation for visual purpose
-            _ball.Rotate(_ball.transform.up, Time.deltaTime * 50);
-            _ball.Rotate(_ball.transform.forward, Time.deltaTime * -50);
+            _ball.Rotate(_ball.transform.up, Time.deltaTime * 25);
+            _ball.Rotate(_ball.transform.forward, Time.deltaTime * -25);
 
             if (!_posDone2)
             {
-                // circle scale (big)
-                var newScale = transform.localScale;
-                newScale.x = Mathf.Lerp(transform.localScale.x, _scale2.x, SMOOTH);
-                newScale.y = Mathf.Lerp(transform.localScale.y, _scale2.y, SMOOTH);
-                newScale.z = Mathf.Lerp(transform.localScale.z, _scale2.z, SMOOTH);
-                transform.localScale = newScale;
-
                 // ball scale (small)
                 var newScaleBall = _ball.localScale;
                 newScaleBall.x = Mathf.Lerp(_ball.localScale.x, _scaleBall1.x, SMOOTH);
@@ -109,14 +122,9 @@ public class ControllerAnimations : MonoBehaviour
                 _ball.localScale = newScaleBall;
 
                 // ball position (backwards)
-                var newPosBall = _ball.transform.position;
-                newPosBall.z = Mathf.Lerp(_ball.position.z, _posBall1, SMOOTH);
-                _ball.transform.position = newPosBall;
-
-                // circle color (black)
-                var oldColor = _mr.material.color;
-                var color = new Color(0.17f, 0.17f, 0.17f, oldColor.a);
-                _mr.material.SetColor("_Color", color);
+                var newPosBall = _ball.transform.localPosition;
+                newPosBall.z = Mathf.Lerp(_ball.localPosition.z, _posBall1, SMOOTH);
+                _ball.transform.localPosition = newPosBall;
 
                 // ball alpha (visible)
                 var oldColorBall = _ballMR.material.color;

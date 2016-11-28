@@ -64,7 +64,6 @@ public class Wand : MonoBehaviour
 
         CheckTouchpadStates();
         CheckButtonStates();
-
         HandleControls();
     }
 
@@ -72,6 +71,9 @@ public class Wand : MonoBehaviour
     // as they enter the trigger for the controller.
     void OnTriggerEnter(Collider other)
     {
+        // Ensures that the object can be moved and that
+        // it doesnt add any duplicates to the list.
+
         var buttonScript = other.transform.parent.GetComponent<PushButton>();
         if (buttonScript != null &&
             !_buttonsWithinReach.Contains(buttonScript))
@@ -81,8 +83,6 @@ public class Wand : MonoBehaviour
             return;
         }
 
-        // Ensures that the object can be moved and that
-        // it doesnt add any duplicates to the list.
         var spawnScript = other.transform.parent.GetComponent<SpawnThis>();
         if (spawnScript != null &&
             !_spawnObjectsWithinReach.Contains(spawnScript))
@@ -261,7 +261,7 @@ public class Wand : MonoBehaviour
 
         _heldObject = null;
         IsHolding = false;
-        CleanLists();
+        CleanLists(); // Prevents controller lock if object never leaves triggerzone.
         _descriptionText.text = "";
     }
 

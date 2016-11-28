@@ -311,6 +311,7 @@ public class SteamVR_RenderModel : MonoBehaviour
 
 	RenderModel LoadRenderModel(CVRRenderModels renderModels, string renderModelName, string baseName)
 	{
+
         var pRenderModel = System.IntPtr.Zero;
 
 		EVRRenderModelError error;
@@ -484,14 +485,18 @@ public class SteamVR_RenderModel : MonoBehaviour
 
 	private bool LoadComponents(RenderModelInterfaceHolder holder, string renderModelName)
 	{
-		// Disable existing components (we will re-enable them if referenced by this new model).
-		// Also strip mesh filter and renderer since these will get re-added if the new component needs them.
+        // Disable existing components (we will re-enable them if referenced by this new model).
+        // Also strip mesh filter and renderer since these will get re-added if the new component needs them.
+
 		var t = transform;
 		for (int i = 0; i < t.childCount; i++)
 		{
 			var child = t.GetChild(i);
-			child.gameObject.SetActive(false);
-			StripMesh(child.gameObject);
+
+            // TODO: undo if better solution is found
+            //child.gameObject.SetActive(false);
+
+            StripMesh(child.gameObject);
 		}
 
 		// If no model specified, we're done; return success.
@@ -687,7 +692,11 @@ public class SteamVR_RenderModel : MonoBehaviour
 			{
 				var child = t.GetChild(i);
 
-				var renderModels = holder.instance;
+                // TODO: if better solution found, undo this
+                if (child.name == "body")
+                    child.gameObject.GetComponent<MeshRenderer>().enabled = false;
+
+                var renderModels = holder.instance;
 				if (renderModels == null)
 					break;
 

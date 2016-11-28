@@ -48,6 +48,7 @@ public class Market : MonoBehaviour
 					if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Dropped) continue;
 
                     // TODO: AT THE LAB CHECK IF THIS WORKS!!
+                    Debug.Log("X: " + transform.position.x + "| Y: " + transform.position.y);
 					if (transform.position.x > 31 && transform.position.z > 15)
 					{
 						_trashCan.Add(hit.transform.gameObject);

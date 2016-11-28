@@ -10,7 +10,6 @@ public class DragAndPlace : MoveObject
 	public bool ReachedHeight;
     public bool keepFalling;
 
-
     private GameObject _previewPlacement, _previewPlacementL, _previewPlacementR;
 	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced;
 	private Vector3 _lastSafePos, _distToHand; // The distance between Rhand and this building.
@@ -37,7 +36,7 @@ public class DragAndPlace : MoveObject
 		_lastSafePos = Vector3.zero;
 
         // TODO: (temporary) for without headset development
-	    //_areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
+	    _areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
 
 		// if placed is true to begin with, it's probably a combined building
 		if (!Dropped) return;
@@ -49,8 +48,9 @@ public class DragAndPlace : MoveObject
 	{
 		//base.Start ();
 		_buildingRotation = GetComponent<BuildingKeepRotation>();
+        _buildingRotation.yRotation = transform.eulerAngles.y; // Ensures the yRot is correct if a combo is made.
 
-		if (!Dropped)
+        if (!Dropped)
 		{
 			_areaCheck.NewPreviewArea(gameObject);
 			_areaCheck.DistanceToPreviewPlacement = Holder.AreaCheck.transform.position - transform.position;
@@ -62,7 +62,7 @@ public class DragAndPlace : MoveObject
 		// If the building has yet to be placed.
 		if (!Dropped)
 		{
-			Holder.AreaCheck.HeldObject = transform; // TODO: Null reference
+			Holder.AreaCheck.HeldObject = transform;
 
 			if (!_onceNotPlaced)
 			{
@@ -78,8 +78,8 @@ public class DragAndPlace : MoveObject
 
 				_onceNotPlaced = true;
 			}
-		}
-		// If the building has been placed.
+        }
+		// If the building has been released.
 		else
 		{
             if (!_oncePlaced)
@@ -144,7 +144,7 @@ public class DragAndPlace : MoveObject
 
 	void Place()
 	{
-		// hide vegetation at the building area
+        // hide vegetation at the building area
 		foreach (Transform tile in _areaCheck.FeaturedVegTiles)
 		{
 			var script = tile.transform.GetComponent<Vegetation>();
@@ -227,6 +227,7 @@ public class DragAndPlace : MoveObject
 		}
 
 		HandleArea();
+
 		return base.DropMe(controller);
 	}
 

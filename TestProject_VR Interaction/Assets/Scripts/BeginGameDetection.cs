@@ -44,17 +44,19 @@ public class BeginGameDetection : MonoBehaviour
             Instantiate(HugeFogPoof);
 
             SaveAndLoad.Load();
-            GameDataHandler.Save();
+            GameDataHandler.Continue();
         }
         else
         {
-            SaveAndLoad.Delete();
+            SaveAndLoad.Delete(); // Safety delete to ensure overwriting of existing files.
             GameFile.current = new GameFile();
             SaveAndLoad.Save();
         }
 
         // so the tutorial movie won't continue playing (it will even if the object isn't active)
-        transform.parent.FindChild("TutorialScreen").FindChild("Movie").GetComponent<Movie>().StopMovie();
+
+        // TODO: this is commented out because quicktime is not installed
+        //transform.parent.FindChild("TutorialScreen").FindChild("Movie").GetComponent<Movie>().StopMovie();
 
 		Destroy(_objectsInGameStartArea[0]); // Cleanup of the object after tutorial is done.
 	}

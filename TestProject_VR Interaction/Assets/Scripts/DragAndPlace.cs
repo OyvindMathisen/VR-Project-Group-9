@@ -36,8 +36,8 @@ public class DragAndPlace : MoveObject
 
 		_lastSafePos = Vector3.zero;
 
-        // TODO: UNDO temporary on pc development
-	    // _areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
+        // TODO: (temporary) for without headset development
+	    //_areaCheck = GameObject.Find("PreviewPlacementRight").GetComponent<AreaCheck>();
 
 		// if placed is true to begin with, it's probably a combined building
 		if (!Dropped) return;
@@ -78,20 +78,6 @@ public class DragAndPlace : MoveObject
 
 				_onceNotPlaced = true;
 			}
-
-			/*
-			// Delete the building in hand
-			if (Holder && Holder.GripButtonDown)
-			{
-				var sfx = _previewPlacement.transform.FindChild("sfxDestroy").GetComponent<AudioSource>();
-				sfx.pitch = UnityEngine.Random.Range(0.9f, 1.2f);
-				sfx.Play();
-
-				Holder.IsHolding = false;
-				Holder.AreaCheck.DeletePreviews();
-				Destroy(gameObject);
-			}
-			*/
 		}
 		// If the building has been placed.
 		else
@@ -126,11 +112,8 @@ public class DragAndPlace : MoveObject
 			// Preformed when a building lands on the intended height.
 			if (!(transform.position.y > GameSettings.BUILD_HEIGHT - 4f) || !(transform.position.y < GameSettings.BUILD_HEIGHT + 4f) || ReachedHeight) return;
 
-			// BUG: fix overlapping buildings
-			//Invoke("TempName", 0.1f);
-
 			var sfx = _previewPlacement.transform.FindChild("sfxPlace1").GetComponent<AudioSource>();
-			sfx.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+			sfx.pitch = Random.Range(0.9f, 1.1f);
 			sfx.Play();
 
 			// particle effect for every tile in placed building
@@ -146,10 +129,10 @@ public class DragAndPlace : MoveObject
 			GameSettings.NewestLandedPosition = gameObject.transform.position;
 			_combiner.LastPlacedTile = gameObject;
 
+            // cancel combination process
 			if (_combiner.Alternatives.Count > 0)
 			{
 				_combiner.onceNewAlts = false;
-				//_combiner.UpdateUI();
 				_combiner.PlayCancelSound();
 			}
 
@@ -255,7 +238,6 @@ public class DragAndPlace : MoveObject
         _isRightHand = (_areaCheck.transform.name == "PreviewPlacementRight");
         _previewPlacement = _isRightHand ? _previewPlacementR : _previewPlacementL;
 
-
         Holder.AreaCheck.NewPreviewArea(gameObject);
 		Holder.AreaCheck.DistanceToPreviewPlacement = Holder.AreaCheck.transform.position - transform.position;
 
@@ -271,7 +253,11 @@ public class DragAndPlace : MoveObject
 			script.Show();
 		}
 
-		_lastSafePos = transform.position;
+	    var sfx = _previewPlacement.transform.FindChild("sfxPickup").GetComponent<AudioSource>();
+        sfx.pitch = Random.Range(0.9f, 1.1f);
+        sfx.Play();
+
+        _lastSafePos = transform.position;
 		_lastSafeRot = transform.rotation;
 
 		Dropped = false;
@@ -365,21 +351,4 @@ public class DragAndPlace : MoveObject
 		_placedWrong = true;
 		_previewPlacement.transform.FindChild("sfxError").GetComponent<AudioSource>().Play();
 	}
-
-	//void TempName()
-	//{
-	//	foreach (Transform child in transform)
-	//	{
-	//		if (!child.name.StartsWith("Collider")) continue;
-	//		RaycastHit hit;
-	//		if (!Physics.Raycast(child.position + Vector3.down * 20, Vector3.up, out hit, 30, Tiles)) continue;
-
-	//		var script = hit.transform.GetComponent<DragAndPlace>();
-	//		if (!script) continue;
-	//		if (script.ReachedHeight)
-	//		{
-	//			HandleIsAreaFree(false);
-	//		}
-	//	}
-	//}
 }

@@ -5,6 +5,7 @@ public class BeginGameDetection : MonoBehaviour
 {
 	public GameObject MainGameObjects;
 	public GameObject MainMenuObjects;
+    public GameObject HugeFogPoof;
 
     public bool continueGame;
 
@@ -40,6 +41,8 @@ public class BeginGameDetection : MonoBehaviour
 
         if (continueGame)
         {
+            Instantiate(HugeFogPoof);
+
             SaveAndLoad.Load();
             GameDataHandler.Save();
         }

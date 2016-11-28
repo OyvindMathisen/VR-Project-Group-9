@@ -1,11 +1,17 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class Popup : MonoBehaviour
 {
     public GameObject SfxPop;
+
+    private Wand _controllerR, _controllerL;
+    private List<GameObject> _triggered = new List<GameObject>();
+
     private float _yAdd, _spinValue;
     private Transform _cam;
     float _timeDisappear, _timer;
+    
 	void Awake ()
 	{
         _cam = GameObject.FindWithTag("MainCamera").transform;
@@ -13,6 +19,12 @@ public class Popup : MonoBehaviour
 	    _spinValue = 30f;
         _timeDisappear = 4f;
 	}
+
+    void Start()
+    {
+        _controllerR = HMDComponents.GetRightWand();
+        _controllerL = HMDComponents.GetLeftWand();
+    }
 	
 	void Update ()
 	{
@@ -43,6 +55,25 @@ public class Popup : MonoBehaviour
             Instantiate(SfxPop, transform.position, Quaternion.identity);
             Destroy(gameObject);
         }
-            
-	}
+
+        // if grabbing this; poof
+	    if (_triggered.Count > 0)
+            if (_controllerR.TriggerButtonDown || _controllerL.TriggerButtonDown)
+                _timer += _timeDisappear;
+
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Rhand" || other.tag == "Lhand")
+        {
+            _triggered.Add(other.gameObject);
+        }
+    }
+    void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Rhand" || other.tag == "Lhand")
+        {
+            _triggered.Remove(other.gameObject);
+        }
+    }
 }

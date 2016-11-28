@@ -5,15 +5,25 @@ public class ComboTracker : MonoBehaviour
 {
 
     public GameObject New;
-    private Transform _indicator;
+    public Material Lava;
+
+    private Transform _indicator, _water;
     private Vector3 _storedIndPos;
     public List<string> CombosDone = new List<string>();
     private TextMesh _comboCount;
-	void Awake () {
+	void Awake ()
+    {
 	    _indicator = transform.FindChild("Indicator");
 	    _comboCount = GameObject.Find("MainGameObjects").transform.FindChild("ComboScreen/ComboCount/Count").GetComponent<TextMesh>();
-	    UpdateCount();
-	}
+        _water = GameObject.Find("Island").transform.FindChild("Water");
+    }
+
+    void Start ()
+    {
+        UpdateCount();
+        if (CombosDone.Count >= GameSettings.TOTAL_COMBO_COUNT)
+            AllCombosDone();
+    }
 
     public void CheckIfNew(string buildingName)
     {
@@ -24,6 +34,12 @@ public class ComboTracker : MonoBehaviour
             _storedIndPos = _indicator.position;
 
             UpdateCount();
+
+            if (CombosDone.Count == GameSettings.TOTAL_COMBO_COUNT)
+            {
+                Invoke("AchievementGet", 2.75f);
+                Invoke("AllCombosDone", 2.75f);
+            }
 
             GameFile.current.combosDone = CombosDone.ToArray();
         }
@@ -38,5 +54,19 @@ public class ComboTracker : MonoBehaviour
     {
         // keeping player updated of how many combos are "found"
         _comboCount.text = CombosDone.Count + "/" + GameSettings.TOTAL_COMBO_COUNT;
+    }
+
+    private void AllCombosDone()
+    {
+        // when all combos have been found/done, change water to lava
+        _water.GetComponent<MeshRenderer>().material = Lava;
+        var waterAnims = _water.parent.FindChild("WaterAnimation").GetComponentsInChildren<SpriteRenderer>();
+        foreach (var anim in waterAnims) anim.enabled = false;
+    }
+
+    private void AchievementGet()
+    {
+        GetComponent<AudioSource>().Play();
+        _water.FindChild("Congratulations").GetComponent<TextMesh>().text = "CONGRATULATIONS!\nALL COMBOS DONE";
     }
 }

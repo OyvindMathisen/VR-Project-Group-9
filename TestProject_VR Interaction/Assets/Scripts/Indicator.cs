@@ -59,8 +59,6 @@ public class Indicator : MonoBehaviour
 		}
 	}
 
-	// todo: late update actually needed? if not, is bug fixed?
-	// bug: når man slipper bygningen for andre gang så kommer man automatisk inn i velge kombinasjons opp eller ned
 	void LateUpdate()
 	{
 		// when dragging the indicator up or down to decide what to do
@@ -112,7 +110,6 @@ public class Indicator : MonoBehaviour
 		}
 		else
 		{
-			// TODO: atm it's just rotating, but we could make it so it's always facing camera (if that's better, we don't know yet)
 			transform.Rotate(0, 160 * Time.deltaTime, 0);
 
 			// lerping height back to normal

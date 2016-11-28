@@ -4,6 +4,9 @@ using System.Collections;
 public class NewGame : MonoBehaviour
 {
     public LayerMask VegetationLayer;
+    public GameObject HugeFogPoof;
+    public Material Water;
+
     private DragAndPlace _buildingScript;
 
 	void Awake ()
@@ -32,7 +35,20 @@ public class NewGame : MonoBehaviour
                 Destroy(b);
 	        }
 
-            // delete old and start new file
+            // various resets
+            var water = GameObject.Find("Island").transform.FindChild("Water");
+
+            water.FindChild("Congratulations").GetComponent<TextMesh>().text = "";
+            GameObject.Find("MainGameObjects").transform.FindChild("ComboScreen/ComboCount/Count").GetComponent<TextMesh>().text = "0/" + GameSettings.TOTAL_COMBO_COUNT;
+
+            water.GetComponent<MeshRenderer>().material = Water;
+            var waterAnims = water.parent.FindChild("WaterAnimation").GetComponentsInChildren<SpriteRenderer>();
+            foreach (var sr in waterAnims) sr.enabled = false;
+
+            // huge poof effect
+            Instantiate(HugeFogPoof);
+
+            // delete old file then start new file
             SaveAndLoad.Delete();
             GameFile.current = new GameFile();
             SaveAndLoad.Save();

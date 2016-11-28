@@ -62,7 +62,14 @@ public class AreaCheck : MonoBehaviour
 				{
 					FeaturedVegTiles.Add(hit.transform);
 				}
-			}
+
+                // TODO: CHECK IF WORKS
+                // change tile color to red if not available
+                var color = new Color(1, 0, 0, 1);
+                if (Physics.Raycast(child.position + Vector3.down * 80, Vector3.up, out hit, 120, Available))
+                    color = new Color(0, 0, 0, 1);
+                child.gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+            }
 			_oldCurrentX = (int)_currentX;
 			_oldCurrentZ = (int)_currentZ;
 		}

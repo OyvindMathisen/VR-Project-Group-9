@@ -71,9 +71,9 @@ public class Wand : MonoBehaviour
     // as they enter the trigger for the controller.
     void OnTriggerEnter(Collider other)
     {
+        if (other.transform.parent == null) return;
         // Ensures that the object can be moved and that
         // it doesnt add any duplicates to the list.
-
         var buttonScript = other.transform.parent.GetComponent<PushButton>();
         if (buttonScript != null &&
             !_buttonsWithinReach.Contains(buttonScript))
@@ -102,6 +102,8 @@ public class Wand : MonoBehaviour
     // if they leave the triggerzone of the controller.
     void OnTriggerExit(Collider other)
     {
+        if (other.transform.parent == null) return;
+
         var buttonScript = other.transform.parent.GetComponent<PushButton>();
         if (buttonScript != null &&
             _buttonsWithinReach.Contains(buttonScript))

@@ -52,8 +52,12 @@ public class AreaCheck : MonoBehaviour
 		// when moving the preview tiles to another area on the grid
 		if ((int)_currentX != _oldCurrentX || (int)_currentZ != _oldCurrentZ)
 		{
-			// list up vegetation tiles at the current preview tiles positions
-			FeaturedVegTiles.Clear();
+            var tempGrey = new List<Transform>();
+            var atLeastOneIsOccupied = false;
+
+            // list up vegetation tiles at the current preview tiles positions
+            FeaturedVegTiles.Clear();
+            
 			foreach (Transform child in _wrap)
 			{
 				if (!child.gameObject.name.StartsWith("Preview")) continue;
@@ -63,13 +67,38 @@ public class AreaCheck : MonoBehaviour
 					FeaturedVegTiles.Add(hit.transform);
 				}
 
-                // TODO: CHECK IF WORKS
-                // change tile color to red if not available
-                var color = new Color(1, 0, 0, 1);
+                // set preview color to white if available
+                var color = new Color(0.5f, 0.5f, 0.5f, 1); // gray
                 if (Physics.Raycast(child.position + Vector3.down * 80, Vector3.up, out hit, 120, Available))
-                    color = new Color(0, 0, 0, 1);
-                child.gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+                    color = new Color(1, 1, 1, 1); // white
+                if (Physics.Raycast(child.position + Vector3.down * 80, Vector3.up, out hit, 120, Occupied) ||
+
+                    (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Tiles) &&
+                    hit.collider.tag == "Tile" &&
+                    hit.transform.GetComponent<DragAndPlace>().Dropped))
+                {
+                    atLeastOneIsOccupied = true;
+                    color = new Color(1, 0, 0, 1); // red
+                }
+                   
+                tempGrey.Add(child);
+
+                child.FindChild("PreviewQuad").gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+                child.FindChild("PreviewQuadInner").gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
             }
+
+            // Makes all preview tiles red, if at least one of them are red.
+            // Ensures user know its an invalid building placement.
+            if (atLeastOneIsOccupied)
+            {
+                var color = new Color(1, 0, 0, 1); // red
+                foreach (var tile in tempGrey)
+                {
+                    tile.FindChild("PreviewQuad").gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+                    tile.FindChild("PreviewQuadInner").gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+                }
+            }
+
 			_oldCurrentX = (int)_currentX;
 			_oldCurrentZ = (int)_currentZ;
 		}
@@ -120,6 +149,7 @@ public class AreaCheck : MonoBehaviour
 					hit.collider.tag == "Tile" &&
 					hit.transform.GetComponent<DragAndPlace>().Dropped)
 					return false;
+                /// TODO: Why is this done twice?
                 if (Physics.Raycast(child.position + new Vector3(0, -100, 0), Vector3.up, out hit, 400, Tiles) &&
                     hit.collider.tag == "Tile" &&
                     hit.transform.GetComponent<DragAndPlace>().Dropped)

@@ -43,7 +43,8 @@ public class NewGame : MonoBehaviour
 
             water.GetComponent<MeshRenderer>().material = Water;
             var waterAnims = water.parent.FindChild("WaterAnimation").GetComponentsInChildren<SpriteRenderer>();
-            foreach (var sr in waterAnims) sr.enabled = false;
+            water.parent.FindChild("WaterfallSteam/sfxWaterfall").GetComponent<AudioSource>().Play();
+            foreach (var sr in waterAnims) sr.enabled = true;
 
             // huge poof effect
             Instantiate(HugeFogPoof);

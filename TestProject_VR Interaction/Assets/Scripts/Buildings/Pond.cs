@@ -26,13 +26,13 @@ public class Pond : MonoBehaviour
 		_combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
         _comboTracker = _combiner.transform.GetComponent<ComboTracker>();
 
-        xPos = new[] { 1, 1, 0, 1, 1, 0, 1, 0, -1, 0, 1, 1, 0 };
-		zPos = new[] { 0, 1, 1, 0, 1, 1, 0, 1, 0, -1, 0, -1, -1 };
+        xPos = new[] { 1, 1, 0, 1, 1, 0, 1, 0, -1, 0, 1, 1, 0, 1, 1, 0 };
+		zPos = new[] { 0, 1, 1, 0, 1, 1, 0, 1, 0, -1, 0, -1, -1, 0, 1, 1 };
 
-		xAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		zAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		rotAdj = new[] { 0, 0, 0, 0, 0, 0, 90, 0, -90, 180, 0, 0, 90 };
-	}
+		xAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		zAdj = new[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        rotAdj = new[] { 0, 0, 0, 0, 0, 0, 90, 0, -90, 180, 0, 0, 90, 0, 0, 0 };
+    }
 
 	void CheckForCombos(int I)
 	{
@@ -54,13 +54,8 @@ public class Pond : MonoBehaviour
 
 					if (hit.transform.name.StartsWith("Pond") && i < 3)
 					{
-						_trashCan.Add(hit.transform.gameObject);
-						p_count++;
-						if (p_count == 3)
-						{
-							result = WaterTreatment;
-						}
-						else continue;
+                        // moved
+                        continue;
 					}
 					else if (((i == 3 || i == 5) && hit.transform.name.StartsWith("Park"))
 						|| (i == 4 && hit.transform.name.StartsWith("Pond")))
@@ -90,7 +85,17 @@ public class Pond : MonoBehaviour
 						}
 						else continue;
 					}
-					else continue;
+                    else if (hit.transform.name.StartsWith("Pond") && i > 12 && i < 16)
+                    {
+                        _trashCan.Add(hit.transform.gameObject);
+                        p_count++;
+                        if (p_count == 3)
+                        {
+                            result = WaterTreatment;
+                        }
+                        else continue;
+                    }
+                    else continue;
 
 					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile))
                     {

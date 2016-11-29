@@ -22,7 +22,7 @@ public class TrashcanScript : MonoBehaviour
 
 		// Allows the controller to register the object leaving the players hand before
 		// deleting, preventing a controller lock.
-		parent.transform.position = new Vector3(-100, -100, -100);
+		parent.transform.position = new Vector3(-30000, 0, -30000);
 		Invoke("funcDestroy", 0.05f);
 	}
 

@@ -5,10 +5,12 @@ using System.Collections.Generic;
 public class DragAndPlace : MoveObject
 {
 	public bool Dropped; // if the tile is still "dragged" around (the mouse button is not released yet)
-	public LayerMask Tiles, VegetationLayer;
+	public LayerMask Tiles, VegetationLayer, TilesInHand;
 	public float BuildingFallSpeed = 1.5f;
 	public bool ReachedHeight;
     public bool keepFalling;
+
+    public bool IsMarket;
 
     private GameObject _previewPlacement, _previewPlacementL, _previewPlacementR;
 	private bool _hasRotated, _oncePlaced, _onceNotPlaced, _placedWrong, _hasEverBeenPlaced;
@@ -137,7 +139,6 @@ public class DragAndPlace : MoveObject
 			}
 
 			CheckConnectedTilesForCombo();
-			//transform.parent.BroadcastMessage("CheckForCombos", false);
 			ReachedHeight = true;
 		}
 	}
@@ -158,8 +159,8 @@ public class DragAndPlace : MoveObject
 		// to prevent raycasting self when checking for free area
 		foreach (var c in GetComponentsInChildren<Collider>())
 		{
-			c.enabled = true;
-		}
+            c.gameObject.layer = LayerMask.NameToLayer("Tiles");
+        }
 
 		if (_placedWrong)
 		{
@@ -211,7 +212,11 @@ public class DragAndPlace : MoveObject
 
 	public override void GrabMe(Wand controller)
 	{
-		base.GrabMe(controller);
+        foreach (var c in GetComponentsInChildren<Collider>())
+        {
+            c.gameObject.layer = LayerMask.NameToLayer("TilesInHand");
+        }
+        base.GrabMe(controller);
 		OnGrab();
 	}
 
@@ -219,12 +224,6 @@ public class DragAndPlace : MoveObject
 	{
 		if (controller != Holder) return false;
 		Dropped = true;
-
-		// to prevent raycasting self when checking for free area
-		foreach (var c in GetComponentsInChildren<Collider>())
-		{
-			c.enabled = false;
-		}
 
 		HandleArea();
 

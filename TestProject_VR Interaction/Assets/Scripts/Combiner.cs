@@ -213,9 +213,8 @@ public class Combiner : MonoBehaviour
 	{
 		foreach (var obj in list)
 		{
-			obj.transform.position = new Vector3(-500, -500, -500);
-
-		}
+			obj.transform.position = new Vector3(-30000, 0, -30000);
+        }
 		_temporaryDeleteList = list;
 		Invoke("DestroyPredecessors", 0.05f);
 	}

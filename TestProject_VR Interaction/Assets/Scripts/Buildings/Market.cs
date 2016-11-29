@@ -14,13 +14,18 @@ public class Market : MonoBehaviour
     private List<GameObject> _trashCan = new List<GameObject>();
 	private List<GameObject>[] _garbageBin;
 	private GameObject result;
+    private DragAndPlace _buildingScript;
 
 	private int[] xPos, zPos, xAdj, zAdj, rotAdj;
 
-	void Awake()
+    private bool _checkFlag;
+    private int _fishMarketCount;
+
+    void Awake()
 	{
 		_xSize = _zSize = GameSettings.SNAP_VALUE;
-		_tiles = transform.GetComponent<DragAndPlace>().Tiles;
+        _buildingScript = GetComponent<DragAndPlace>();
+		_tiles = _buildingScript.Tiles;
 		_combiner = GameObject.Find("Combiner").GetComponent<Combiner>();
         _comboTracker = _combiner.transform.GetComponent<ComboTracker>();
 
@@ -31,6 +36,23 @@ public class Market : MonoBehaviour
 		zAdj = new[] { 0 };
 		rotAdj = new[] { 0 };
 	}
+
+    void Update()
+    {
+        if (transform.position.x > 31 && transform.position.z > 15)
+        {
+            if (_buildingScript.ReachedHeight && !_checkFlag)
+            {
+                CheckForCombos(-2);
+                _checkFlag = true;
+            }
+            else if (!_buildingScript.ReachedHeight)
+            {
+                _fishMarketCount = 0;
+                _checkFlag = false;
+            }
+        }
+    }
 
 	void CheckForCombos(int I)
 	{
@@ -47,13 +69,12 @@ public class Market : MonoBehaviour
 				{
 					if (hit.collider.tag != "Tile" || !hit.transform.GetComponent<DragAndPlace>().Dropped) continue;
 
-                    // TODO: AT THE LAB CHECK IF THIS WORKS!!
-                    Debug.Log("X: " + transform.position.x + "| Y: " + transform.position.y);
 					if (transform.position.x > 31 && transform.position.z > 15)
 					{
-						_trashCan.Add(hit.transform.gameObject);
+                        _trashCan.Add(hit.transform.gameObject);
 						result = FishMarket;
-					}
+                        _fishMarketCount++;
+                    }
 					else continue;
 
 					if (gameObject != _combiner.LastPlacedTile && !_trashCan.Contains(_combiner.LastPlacedTile))
@@ -61,6 +82,9 @@ public class Market : MonoBehaviour
                         _trashCan.Clear();
                         continue;
                     }
+
+                    if (result == FishMarket && _fishMarketCount > 1) continue;
+
 					_combiner.Alternatives.Add(gameObject);
 					_combiner.Names.Add(result.name);
 					_combiner.I.Add(i);

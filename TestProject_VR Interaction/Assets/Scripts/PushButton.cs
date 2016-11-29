@@ -8,6 +8,9 @@ public class PushButton : MonoBehaviour
 	private Animator _animationHandler;
     private AudioSource _sfx;
 
+    private float _cooldownTimer = 0.25f;
+    private float _timer;
+
     // Use this for initialization
     void Start()
     {
@@ -17,8 +20,17 @@ public class PushButton : MonoBehaviour
         _sfx = GetComponent<AudioSource>();
     }
 
+    void Update()
+    {
+        _timer += Time.deltaTime;
+    }
+
     public void ButtonPush()
     {
+        if (_timer < _cooldownTimer) return;
+
+        _timer = 0;
+
 	    _animationHandler.SetBool("Pushed", true); // Sets animation state, and lets it handle the animation
 		_displayBoard.ChangeCategory(ButtonDirection); // Tells the board to change category
 
@@ -27,6 +39,6 @@ public class PushButton : MonoBehaviour
 
 	public void ButtonUnpush()
 	{
-		_animationHandler.SetBool("Pushed", false); // Resets animation state once more.
+        _animationHandler.SetBool("Pushed", false); // Resets animation state once more.
 	}
 }

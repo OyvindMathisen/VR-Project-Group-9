@@ -6,19 +6,16 @@ public class Movie : MonoBehaviour
 
     private MovieTexture _movie;
     private bool _flag;
+	void Awake()
+	{
 
-    // TODO: this is commented out because quicktime is not installed
+		_movie = (MovieTexture)GetComponent<Renderer>().material.mainTexture;
+		_movie.loop = true;
+		_movie.Play();
+	}
 
- //   void Awake ()
-	//{
-        
-	//    _movie = (MovieTexture)GetComponent<Renderer>().material.mainTexture;
-	//    _movie.loop = true;
- //       _movie.Play();
- //   }
-
- //   public void StopMovie()
- //   {
- //       _movie.Stop();
- //   }
+	public void StopMovie()
+	{
+		_movie.Stop();
+	}
 }

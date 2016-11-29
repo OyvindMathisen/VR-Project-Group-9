@@ -61,6 +61,7 @@ public class ComboTracker : MonoBehaviour
         // when all combos have been found/done, change water to lava
         _water.GetComponent<MeshRenderer>().material = Lava;
         var waterAnims = _water.parent.FindChild("WaterAnimation").GetComponentsInChildren<SpriteRenderer>();
+        _water.parent.FindChild("WaterfallSteam/sfxWaterfall").GetComponent<AudioSource>().Stop();
         foreach (var anim in waterAnims) anim.enabled = false;
     }
 

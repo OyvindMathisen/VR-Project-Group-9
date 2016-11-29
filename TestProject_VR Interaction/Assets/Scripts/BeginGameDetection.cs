@@ -43,6 +43,7 @@ public class BeginGameDetection : MonoBehaviour
         {
             Instantiate(HugeFogPoof);
 
+            GameFile.current = new GameFile();
             SaveAndLoad.Load();
             GameDataHandler.Continue();
         }
